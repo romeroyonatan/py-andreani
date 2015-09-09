@@ -1,7 +1,7 @@
 # py-andreani
 Modulo python para comunicacion con API de Andreani.
 
-Basado en el versión 1.9 de la API
+Basado en el versión 2.0 de la API
 
 ## Instalación
 TODO
