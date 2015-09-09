@@ -1,17 +1,36 @@
 '''
 Implementa los servicios ofrecidos por el webservice de andreani.
 '''
+import logging
+
+from suds.client import Client
+from suds.wsse import UsernameToken, Security
 
 class Andreani(object):
     '''
     Implementa los servicios ofrecidos por el webservice de andreani.
     '''
 
+    def __init__(self, username, password):
+        '''
+        Crea tokens de seguridad con las credenciales otorgadas por Andreani.
+        '''
+        # guardo token generado como atributo del objeto
+        token = UsernameToken(username, password)
+        self.security = Security()
+        self.security.tokens.append(token)
+
     def consulta_sucursales(self):
         '''
         Devuelve una lista de sucursales Andreani habilitadas para la entrega 
-        por mostrador.'''
-        pass
+        por mostrador.
+        '''
+        url = "https://www.e-andreani.com/CasaStaging/eCommerce/ConsultaSucursales.svc?wsdl"
+        client = Client(url)
+        client.set_options(wsse=self.security)
+        logging.debug(client)
+        result = client.service.ConsultarSucursales()
+        logging.debug(result)
     
     def cotizar_envios(self):
         '''
