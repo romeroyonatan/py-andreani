@@ -7,5 +7,4 @@ setup(name='py-andreani',
       url='https://github.com/romeroyonatan/py-andreani',
       platforms="Python3",
       packages=['andreani'],
-      requires=['suds'],
       )
