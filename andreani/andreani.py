@@ -3,9 +3,9 @@ Implementa los servicios ofrecidos por el webservice de andreani.
 '''
 
 class Andreani(object):
-'''
-Implementa los servicios ofrecidos por el webservice de andreani.
-'''
+    '''
+    Implementa los servicios ofrecidos por el webservice de andreani.
+    '''
 
     def consulta_sucursales(self):
         '''
