@@ -11,14 +11,27 @@ class Andreani(object):
     Implementa los servicios ofrecidos por el webservice de andreani.
     '''
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, cliente, contrato):
         '''
-        Crea tokens de seguridad con las credenciales otorgadas por Andreani.
+        Inicializa datos del objeto 
         '''
         # guardo token generado como atributo del objeto
         token = UsernameToken(username, password)
         self.security = Security()
         self.security.tokens.append(token)
+        # numero de cliente
+        self.cliente = cliente
+        # numero de servicio andreani
+        self.contrato = contrato
+
+    def __get_client(self, url):
+        '''
+        Obtiene un cliente SOAP para utilizar.
+        '''
+        client = Client(url)
+        client.set_options(wsse=self.security)
+        return client
+
 
     def consulta_sucursales(self):
         '''
@@ -26,17 +39,34 @@ class Andreani(object):
         por mostrador.
         '''
         url = "https://www.e-andreani.com/CasaStaging/eCommerce/ConsultaSucursales.svc?wsdl"
-        client = Client(url)
-        client.set_options(wsse=self.security)
+        client = self.__get_client(url)
         logging.debug(client)
         result = client.service.ConsultarSucursales()
         logging.debug(result)
     
-    def cotizar_envios(self):
+    def cotizar_envio(self, sucursal_retiro, cp_destino, peso, volumen):
         '''
         Permite cotizar en línea el costo de un envío.
+
+        args
+        --------
+        sucursal_retiro -- integer: Código de "Sucursal Andreani" donde el envío 
+                                   permanecerá en Custodia. Obligatorio para los 
+                                   Servicios de Retiro en Sucursal
+        cp_detino -- string: Obligatorio para los Servicios de Envío a Domicilio
+        peso -- float: Expresado en gramos
+        volumen -- float: Expresados en centimetros cúbicos
         '''
-        pass
+        url = "https://www.e-andreani.com/CasaStaging/eCommerce/CotizacionEnvio.svc?wsdl"
+        client = self.__get_client(url)
+        logging.debug(client)
+        result = client.service.CotizarEnvio(CPDestino=cp_destino,
+                                             Cliente=self.cliente,
+                                             Contrato=self.contrato,
+                                             Peso=peso,
+                                             SucursalRetiro=sucursal_retiro,
+                                             Volumen=volumen)
+        logging.debug(result)
     
     def confirmar_compra(self):
         '''
