@@ -29,7 +29,9 @@ class Andreani(object):
         Obtiene un cliente SOAP para utilizar.
         '''
         client = Client(url)
-        client.set_options(wsse=self.security)
+        client.set_options(wsse=self.security,
+                           headers={'Content-Type':'application/soap+xml'}
+                          )
         return client
 
 
