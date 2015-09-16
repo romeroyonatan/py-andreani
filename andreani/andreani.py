@@ -3,10 +3,9 @@ Implementa los servicios ofrecidos por el webservice de andreani.
 '''
 import logging
 
+import suds
 from suds.client import Client
 from suds.wsse import UsernameToken, Security
-from suds.plugin import MessagePlugin
-from suds import null
 
 # modifico namespace del envoltorio soap
 from suds.bindings import binding
@@ -55,9 +54,12 @@ class Andreani(object):
                         soap.service.ConsultarSucursales.method.soap.action)
         soap.set_options(headers={'Content-Type': content_type})
         # configuro parametros de la consulta
-        consulta = {'CodigoPostal': codigo_postal if codigo_postal else null(),
-                    'Localidad': localidad,
-                    'Provincia': provincia}
+        if codigo_postal or localidad or provincia:
+            consulta = {'CodigoPostal': codigo_postal,
+                        'Localidad': localidad,
+                        'Provincia': provincia}
+        else:
+            consulta = {'CodigoPostal': suds.null()}
         # realizo la consulta y obtengo el resultado
         result = soap.service.ConsultarSucursales(consulta=consulta)
         return result

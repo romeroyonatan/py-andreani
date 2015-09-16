@@ -22,10 +22,34 @@ logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 class AndreaniTests(TestCase):
     def test_consultar_sucursales(self):
         andreani = Andreani(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_SUCURSAL)
-        sucursales = andreani.consulta_sucursales(codigo_postal=1048)
-        self.assertTrue(sucursales)
+        # consulta sin filtros
         sucursales = andreani.consulta_sucursales()
         self.assertTrue(sucursales)
+        # filtro codigo postal
+        sucursales = andreani.consulta_sucursales(codigo_postal=1048)
+        self.assertTrue(sucursales)
+        # filtro provincia
+        sucursales = andreani.consulta_sucursales(provincia="santa fe")
+        self.assertTrue(sucursales)
+        # filtro localidad
+        sucursales = andreani.consulta_sucursales(localidad="rosario")
+        self.assertTrue(sucursales)
+        # filtros combinados
+        sucursales = andreani.consulta_sucursales(codigo_postal=1048,
+                                                  localidad="c.a.b.a.")
+        self.assertTrue(sucursales)
+        sucursales = andreani.consulta_sucursales(provincia="santa fe",
+                                                  localidad="venado tuerto")
+        self.assertTrue(sucursales)
+        # todos los filtros
+        sucursales = andreani.consulta_sucursales(provincia="buenos aires",
+                                                  localidad="san justo",
+                                                  codigo_postal=1754)
+        self.assertTrue(sucursales)
+        # sin resultados
+        sucursales = andreani.consulta_sucursales(provincia="cordoba",
+                                                  localidad="san justo")
+        self.assertFalse(sucursales)
 
     def test_cotizar_envio(self):
         andreani = Andreani(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_SUCURSAL)
