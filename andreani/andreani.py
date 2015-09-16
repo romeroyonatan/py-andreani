@@ -50,6 +50,8 @@ class Andreani(object):
                "ConsultaSucursales.svc?wsdl")
         soap = self.__soap(url)
         # configuro content-type de la peticion
+        # XXX: es obligatorio para el servidor que el parametro action este 
+        # dentro de la cabecera 'Content-Type'
         content_type = ('application/soap+xml;charset=UTF-8;action=%s' %
                         soap.service.ConsultarSucursales.method.soap.action)
         soap.set_options(headers={'Content-Type': content_type})
@@ -59,10 +61,16 @@ class Andreani(object):
                         'Localidad': localidad,
                         'Provincia': provincia}
         else:
+            #XXX: tengo que forzar enviar null porque el webservice lanza una
+            # excepcion si el parametro <consulta> no esta en la peticion
             consulta = {'CodigoPostal': suds.null()}
         # realizo la consulta y obtengo el resultado
         result = soap.service.ConsultarSucursales(consulta=consulta)
-        return result
+        # devuelvo lista de sucursales
+        if result:
+            return result[0] #XXX: WS devuelve un array de array
+        else:
+            return []
 
     def cotizar_envio(self, sucursal_retiro, cp_destino, peso, volumen):
         '''
