@@ -19,7 +19,7 @@ class Andreani(object):
 
     def __init__(self, username, password, cliente, contrato):
         '''
-        Inicializa datos del objeto 
+        Inicializa datos del objeto
         '''
         # guardo token generado como atributo del objeto
         token = UsernameToken(username, password)
@@ -39,11 +39,11 @@ class Andreani(object):
         return client
 
 
-    def consulta_sucursales(self, codigo_postal=None, 
-                                  localidad=None, 
+    def consulta_sucursales(self, codigo_postal=None,
+                                  localidad=None,
                                   provincia=None):
         '''
-        Devuelve una lista de sucursales Andreani habilitadas para la entrega 
+        Devuelve una lista de sucursales Andreani habilitadas para la entrega
         por mostrador.
         '''
         # configuro url del wsdl
@@ -61,37 +61,38 @@ class Andreani(object):
         # realizo la consulta y obtengo el resultado
         result = soap.service.ConsultarSucursales(consulta=consulta)
         return result
-    
+
     def cotizar_envio(self, sucursal_retiro, cp_destino, peso, volumen):
         '''
         Permite cotizar en línea el costo de un envío.
 
         args
         --------
-        sucursal_retiro -- integer: Código de "Sucursal Andreani" donde el envío 
-                                   permanecerá en Custodia. Obligatorio para los 
+        sucursal_retiro -- integer: Código de "Sucursal Andreani" donde el envío
+                                   permanecerá en Custodia. Obligatorio para los
                                    Servicios de Retiro en Sucursal
         cp_detino -- string: Obligatorio para los Servicios de Envío a Domicilio
         peso -- float: Expresado en gramos
         volumen -- float: Expresados en centimetros cúbicos
         '''
-        url = "https://www.e-andreani.com/CasaStaging/eCommerce/CotizacionEnvio.svc?wsdl"
-        client = self.__soap(url)
-        logging.debug(soap)
-        result = soap.service.CotizarEnvio(CPDestino=cp_destino,
-                                             Cliente=self.cliente,
-                                             Contrato=self.contrato,
-                                             Peso=peso,
-                                             SucursalRetiro=sucursal_retiro,
-                                             Volumen=volumen)
-        logging.debug(result)
-    
+        pass
+        # url = "https://www.e-andreani.com/CasaStaging/eCommerce/CotizacionEnvio.svc?wsdl"
+        # client = self.__soap(url)
+        # logging.debug(soap)
+        # result = soap.service.CotizarEnvio(CPDestino=cp_destino,
+                                             # Cliente=self.cliente,
+                                             # Contrato=self.contrato,
+                                             # Peso=peso,
+                                             # SucursalRetiro=sucursal_retiro,
+                                             # Volumen=volumen)
+        # logging.debug(result)
+
     def confirmar_compra(self):
         '''
         Genera un envío en Andreani.
-        
-        Asigna un identificador con el cual se va a hacer el seguimiento. 
-        Luego se debe llamar al WS de Imprimir Constancia para finalizar el 
+
+        Asigna un identificador con el cual se va a hacer el seguimiento.
+        Luego se debe llamar al WS de Imprimir Constancia para finalizar el
         proceso de Alta del envío.
         '''
         pass
@@ -100,8 +101,8 @@ class Andreani(object):
         '''
         Genera un envío y devuelve todos los datos necesarios para
         que el cliente imprima la etiqueta del bulto.
-        
-        A diferencia del Confirmar compra el pedido finaliza el proceso de Alta, 
+
+        A diferencia del Confirmar compra el pedido finaliza el proceso de Alta,
         El uso de este Web Services es recomendado para cliente que
         tienen altas intensivas y un proceso de preparación que
         necesita agilidad
@@ -137,23 +138,23 @@ class Andreani(object):
 
     def anular_envio(self):
         '''
-        Anula envíos que todavía no hayan ingresado al circuito operativo 
+        Anula envíos que todavía no hayan ingresado al circuito operativo
         '''
         pass
 
     def consultar_datos_impresion(self):
         '''
-        Este servicio permite consultar los datos de impresión de una pieza 
+        Este servicio permite consultar los datos de impresión de una pieza
         dada.
         '''
         pass
 
     def reporte_envios_pendientes_impresion(self):
         '''
-        Devuelve una lista de envíos que fueron dados a través del servicio 
+        Devuelve una lista de envíos que fueron dados a través del servicio
         "Confirmación de compra".
 
-        Sirve para permitir su impresión mediante el servicio de "Imprimir 
+        Sirve para permitir su impresión mediante el servicio de "Imprimir
         constancias".
         '''
         pass
