@@ -22,8 +22,8 @@ logging.basicConfig(filename='testing.log',level=logging.DEBUG)
 class AndreaniTests(TestCase):
     def test_consultar_sucursales(self):
         andreani = Andreani(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_SUCURSAL)
-        andreani.consulta_sucursales(codigo_postal=1048)
-        self.assertTrue(False)
+        sucursales = andreani.consulta_sucursales(codigo_postal=1048)
+        self.assertTrue(sucursales)
 
     def test_cotizar_envio(self):
         andreani = Andreani(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_SUCURSAL)

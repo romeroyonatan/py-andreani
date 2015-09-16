@@ -7,6 +7,10 @@ from suds.client import Client
 from suds.wsse import UsernameToken, Security
 from suds.plugin import MessagePlugin
 
+# modifico namespace del envoltorio soap
+from suds.bindings import binding
+binding.envns=('SOAP-ENV', 'http://www.w3.org/2003/05/soap-envelope')
+
 class Andreani(object):
     '''
     Implementa los servicios ofrecidos por el webservice de andreani.
@@ -33,7 +37,7 @@ class Andreani(object):
         client.set_options(wsse=self.security,
                            #headers={'Content-Type':'application/soap+xml'},
                            headers={'Content-Type':'application/soap+xml;charset=UTF-8;action="http://www.andreani.com.ar/IConsultaSucursales/ConsultarSucursales"'},
-                           plugins=[CorrectNamespace()],
+                           #plugins=[CorrectNamespace()],
                           )
         return client
 
@@ -53,6 +57,7 @@ class Andreani(object):
                     'Provincia': provincia}
         result = soap.service.ConsultarSucursales(consulta=consulta)
         logging.debug(result)
+        return result
     
     def cotizar_envio(self, sucursal_retiro, cp_destino, peso, volumen):
         '''
@@ -166,14 +171,3 @@ class Andreani(object):
         pass
 
 
-class CorrectNamespace(MessagePlugin):
-    '''
-    Corrige namespaces generados por suds para que sea compatible con los 
-    namespaces de los servidores de andreani.
-    '''
-    def marshalled(self, context):
-        soap_env_parent = context.envelope
-        for (key, value) in soap_env_parent.nsprefixes.items():
-            if value == "http://schemas.xmlsoap.org/soap/envelope/":
-                soap_env_parent.nsprefixes[key]= ('http://www.w3.org/2003/05/' +
-                                                  'soap-envelope')
