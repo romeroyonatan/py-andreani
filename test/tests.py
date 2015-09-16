@@ -17,12 +17,12 @@ CONTRATO_ESTANDAR = "AND00EST"
 # Contrato gestion de cambio
 CONTRATO_CAMBIO = "AND00CMB"
 
-logging.basicConfig(filename='example.log',level=logging.DEBUG)
+logging.basicConfig(filename='testing.log',level=logging.DEBUG)
 
-class TestAndreani(TestCase):
+class AndreaniTests(TestCase):
     def test_consultar_sucursales(self):
         andreani = Andreani(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_SUCURSAL)
-        andreani.consulta_sucursales()
+        andreani.consulta_sucursales(codigo_postal=1048)
         self.assertTrue(False)
 
     def test_cotizar_envio(self):

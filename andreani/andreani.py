@@ -5,6 +5,7 @@ import logging
 
 from suds.client import Client
 from suds.wsse import UsernameToken, Security
+from suds.plugin import MessagePlugin
 
 class Andreani(object):
     '''
@@ -24,26 +25,33 @@ class Andreani(object):
         # numero de servicio andreani
         self.contrato = contrato
 
-    def __get_client(self, url):
+    def __soap(self, url):
         '''
         Obtiene un cliente SOAP para utilizar.
         '''
         client = Client(url)
         client.set_options(wsse=self.security,
-                           headers={'Content-Type':'application/soap+xml'}
+                           headers={'Content-Type':'application/soap+xml;charset=UTF-8',
+                                    'action': 'http://www.andreani.com.ar/IConsultaSucursales/ConsultarSucursales'},
+                           plugins=[CorrectNamespace()],
                           )
         return client
 
 
-    def consulta_sucursales(self):
+    def consulta_sucursales(self, codigo_postal=None, 
+                                  localidad=None, 
+                                  provincia=None):
         '''
         Devuelve una lista de sucursales Andreani habilitadas para la entrega 
         por mostrador.
         '''
         url = "https://www.e-andreani.com/CasaStaging/eCommerce/ConsultaSucursales.svc?wsdl"
-        client = self.__get_client(url)
-        logging.debug(client)
-        result = client.service.ConsultarSucursales()
+        soap = self.__soap(url)
+        logging.debug(soap)
+        consulta = {'CodigoPostal': codigo_postal,
+                    'Localidad': localidad,
+                    'Provincia': provincia}
+        result = soap.service.ConsultarSucursales(consulta=consulta)
         logging.debug(result)
     
     def cotizar_envio(self, sucursal_retiro, cp_destino, peso, volumen):
@@ -60,9 +68,9 @@ class Andreani(object):
         volumen -- float: Expresados en centimetros cúbicos
         '''
         url = "https://www.e-andreani.com/CasaStaging/eCommerce/CotizacionEnvio.svc?wsdl"
-        client = self.__get_client(url)
-        logging.debug(client)
-        result = client.service.CotizarEnvio(CPDestino=cp_destino,
+        client = self.__soap(url)
+        logging.debug(soap)
+        result = soap.service.CotizarEnvio(CPDestino=cp_destino,
                                              Cliente=self.cliente,
                                              Contrato=self.contrato,
                                              Peso=peso,
@@ -156,3 +164,16 @@ class Andreani(object):
         como de el retiro en depósito realizado por Andreani.
         '''
         pass
+
+
+class CorrectNamespace(MessagePlugin):
+    '''
+    Corrige namespaces generados por suds para que sea compatible con los 
+    namespaces de los servidores de andreani.
+    '''
+    def marshalled(self, context):
+        soap_env_parent = context.envelope
+        for (key, value) in soap_env_parent.nsprefixes.items():
+            if value == "http://schemas.xmlsoap.org/soap/envelope/":
+                soap_env_parent.nsprefixes[key]= ('http://www.w3.org/2003/05/' +
+                                                  'soap-envelope')
