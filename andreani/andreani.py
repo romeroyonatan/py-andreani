@@ -34,11 +34,7 @@ class Andreani(object):
         Obtiene un cliente SOAP para utilizar.
         '''
         client = Client(url)
-        client.set_options(wsse=self.security,
-                           #headers={'Content-Type':'application/soap+xml'},
-                           headers={'Content-Type':'application/soap+xml;charset=UTF-8;action="http://www.andreani.com.ar/IConsultaSucursales/ConsultarSucursales"'},
-                           #plugins=[CorrectNamespace()],
-                          )
+        client.set_options(wsse=self.security)
         return client
 
 
@@ -49,14 +45,20 @@ class Andreani(object):
         Devuelve una lista de sucursales Andreani habilitadas para la entrega 
         por mostrador.
         '''
-        url = "https://www.e-andreani.com/CasaStaging/eCommerce/ConsultaSucursales.svc?wsdl"
+        # configuro url del wsdl
+        url = ("https://www.e-andreani.com/CasaStaging/eCommerce/" +
+               "ConsultaSucursales.svc?wsdl")
         soap = self.__soap(url)
-        logging.debug(soap)
+        # configuro content-type de la peticion
+        content_type = ('application/soap+xml;charset=UTF-8;action=%s' %
+                        soap.service.ConsultarSucursales.method.soap.action)
+        soap.set_options(headers={'Content-Type': content_type})
+        # configuro parametros de la consulta
         consulta = {'CodigoPostal': codigo_postal,
                     'Localidad': localidad,
                     'Provincia': provincia}
+        # realizo la consulta y obtengo el resultado
         result = soap.service.ConsultarSucursales(consulta=consulta)
-        logging.debug(result)
         return result
     
     def cotizar_envio(self, sucursal_retiro, cp_destino, peso, volumen):
