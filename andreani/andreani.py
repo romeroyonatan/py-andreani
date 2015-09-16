@@ -31,8 +31,8 @@ class Andreani(object):
         '''
         client = Client(url)
         client.set_options(wsse=self.security,
-                           headers={'Content-Type':'application/soap+xml;charset=UTF-8',
-                                    'action': 'http://www.andreani.com.ar/IConsultaSucursales/ConsultarSucursales'},
+                           #headers={'Content-Type':'application/soap+xml'},
+                           headers={'Content-Type':'application/soap+xml;charset=UTF-8;action="http://www.andreani.com.ar/IConsultaSucursales/ConsultarSucursales"'},
                            plugins=[CorrectNamespace()],
                           )
         return client
