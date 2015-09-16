@@ -6,6 +6,7 @@ import logging
 from suds.client import Client
 from suds.wsse import UsernameToken, Security
 from suds.plugin import MessagePlugin
+from suds import null
 
 # modifico namespace del envoltorio soap
 from suds.bindings import binding
@@ -54,7 +55,7 @@ class Andreani(object):
                         soap.service.ConsultarSucursales.method.soap.action)
         soap.set_options(headers={'Content-Type': content_type})
         # configuro parametros de la consulta
-        consulta = {'CodigoPostal': codigo_postal,
+        consulta = {'CodigoPostal': codigo_postal if codigo_postal else null(),
                     'Localidad': localidad,
                     'Provincia': provincia}
         # realizo la consulta y obtengo el resultado
