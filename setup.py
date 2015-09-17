@@ -21,5 +21,5 @@ setup(name='py-andreani',
       keywords="andreani e-commerce argentina oca",
       packages=['andreani'],
       install_requires=reqs,
-      test_suite="test.tests",
+      test_suite="test",
       )
