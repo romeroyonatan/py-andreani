@@ -32,12 +32,18 @@ class API(object):
         # numero de servicio andreani
         self.contrato = contrato
 
-    def __soap(self, url):
+    def __soap(self, url, metodo):
         '''
         Obtiene un cliente SOAP para utilizar.
         '''
         client = Client(url)
-        client.set_options(wsse=self.security)
+        # configuro content-type de la peticion
+        # XXX: es obligatorio para el servidor que el parametro "action" este
+        # dentro de la cabecera 'Content-Type'
+        action = getattr(client.service, metodo).method.soap.action
+        content_type = ('application/soap+xml;action=%s' % action)
+        client.set_options(wsse=self.security,
+                           headers={'Content-Type': content_type})
         return client
 
     def consulta_sucursales(self, codigo_postal=None,
@@ -50,13 +56,7 @@ class API(object):
         # configuro url del wsdl
         url = ("https://www.e-andreani.com/CasaStaging/eCommerce/" +
                "ConsultaSucursales.svc?wsdl")
-        soap = self.__soap(url)
-        # configuro content-type de la peticion
-        # XXX: es obligatorio para el servidor que el parametro action este
-        # dentro de la cabecera 'Content-Type'
-        content_type = ('application/soap+xml;charset=UTF-8;action=%s' %
-                        soap.service.ConsultarSucursales.method.soap.action)
-        soap.set_options(headers={'Content-Type': content_type})
+        soap = self.__soap(url, 'ConsultarSucursales')
         # configuro parametros de la consulta
         if codigo_postal or localidad or provincia:
             consulta = {'CodigoPostal': codigo_postal,
@@ -93,13 +93,7 @@ class API(object):
         # configuro url del wsdl
         url = ("https://www.e-andreani.com/CasaStaging/eCommerce/" +
                "CotizacionEnvio.svc?wsdl")
-        soap = self.__soap(url)
-        # configuro content-type de la peticion
-        # XXX: es obligatorio para el servidor que el parametro action este
-        # dentro de la cabecera 'Content-Type'
-        content_type = ('application/soap+xml;charset=UTF-8;action=%s' %
-                        soap.service.CotizarEnvio.method.soap.action)
-        soap.set_options(headers={'Content-Type': content_type})
+        soap = self.__soap(url, "CotizarEnvio")
         # configuro parametros de la peticion
         parametros = {
             'CPDestino': cp_destino,
@@ -181,13 +175,7 @@ class API(object):
         # configuro url del wsdl
         url = ("https://www.e-andreani.com/CasaStaging/eCommerce/" +
                "ImposicionRemota.svc?wsdl")
-        soap = self.__soap(url)
-        # configuro content-type de la peticion
-        # XXX: es obligatorio para el servidor que el parametro action este
-        # dentro de la cabecera 'Content-Type'
-        content_type = ('application/soap+xml;charset=UTF-8;action=%s' %
-                        soap.service.ConfirmarCompra.method.soap.action)
-        soap.set_options(headers={'Content-Type': content_type})
+        soap = self.__soap(url, "ConfirmarCompra")
         # configuro parametros de la peticion
         parametros = { 
             'SucursalRetiro': kwargs.get('sucursal_retiro'),
