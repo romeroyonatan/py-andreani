@@ -70,10 +70,13 @@ class Andreani(object):
         # realizo la consulta y obtengo el resultado
         result = soap.service.ConsultarSucursales(consulta=consulta)
         # devuelvo lista de sucursales
-        if result:
-            return [self.__to_dict(sucursal) for sucursal in result[0]]
-        else:
-            return []
+        try:
+            if result:
+                return [self.__to_dict(sucursal) for sucursal in result[0]]
+            else:
+                return []
+        except suds.WebFault as e:
+            raise AndreaniError(e.fault.Reason.Text) from e
 
     def cotizar_envio(self, peso, volumen, cp_destino, sucursal_retiro=None):
         '''
