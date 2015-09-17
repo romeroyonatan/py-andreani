@@ -10,9 +10,11 @@ from suds.wsse import UsernameToken, Security
 
 # modifico namespace del envoltorio soap
 from suds.bindings import binding
-binding.envns=('SOAP-ENV', 'http://www.w3.org/2003/05/soap-envelope')
+binding.envns = ('SOAP-ENV', 'http://www.w3.org/2003/05/soap-envelope')
+
 
 class Andreani(object):
+
     '''
     Implementa los servicios ofrecidos por el webservice de andreani.
     '''
@@ -38,10 +40,9 @@ class Andreani(object):
         client.set_options(wsse=self.security)
         return client
 
-
     def consulta_sucursales(self, codigo_postal=None,
-                                  localidad=None,
-                                  provincia=None):
+                            localidad=None,
+                            provincia=None):
         '''
         Devuelve una lista de sucursales Andreani habilitadas para la entrega
         por mostrador.
@@ -51,7 +52,7 @@ class Andreani(object):
                "ConsultaSucursales.svc?wsdl")
         soap = self.__soap(url)
         # configuro content-type de la peticion
-        # XXX: es obligatorio para el servidor que el parametro action este 
+        # XXX: es obligatorio para el servidor que el parametro action este
         # dentro de la cabecera 'Content-Type'
         content_type = ('application/soap+xml;charset=UTF-8;action=%s' %
                         soap.service.ConsultarSucursales.method.soap.action)
@@ -62,7 +63,7 @@ class Andreani(object):
                         'Localidad': localidad,
                         'Provincia': provincia}
         else:
-            #XXX: tengo que forzar enviar null porque el webservice lanza una
+            # XXX: tengo que forzar enviar null porque el webservice lanza una
             # excepcion si el parametro <consulta> no esta en la peticion
             consulta = {'CodigoPostal': suds.null()}
         # realizo la consulta y obtengo el resultado
@@ -91,11 +92,11 @@ class Andreani(object):
         # client = self.__soap(url)
         # logging.debug(soap)
         # result = soap.service.CotizarEnvio(CPDestino=cp_destino,
-                                             # Cliente=self.cliente,
-                                             # Contrato=self.contrato,
-                                             # Peso=peso,
-                                             # SucursalRetiro=sucursal_retiro,
-                                             # Volumen=volumen)
+        # Cliente=self.cliente,
+        # Contrato=self.contrato,
+        # Peso=peso,
+        # SucursalRetiro=sucursal_retiro,
+        # Volumen=volumen)
         # logging.debug(result)
 
     def confirmar_compra(self):
@@ -208,4 +209,3 @@ class Andreani(object):
                 result.append("_")
             result.append(char.lower())
         return ''.join(result)
-
