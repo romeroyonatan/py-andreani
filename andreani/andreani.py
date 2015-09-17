@@ -71,10 +71,8 @@ class Andreani(object):
         result = soap.service.ConsultarSucursales(consulta=consulta)
         # devuelvo lista de sucursales
         try:
-            if result:
-                return [self.__to_dict(sucursal) for sucursal in result[0]]
-            else:
-                return []
+            return ([self.__to_dict(sucursal) for sucursal in result[0]] if
+                    result else [])
         except suds.WebFault as e:
             raise AndreaniError(e.fault.Reason.Text) from e
 
