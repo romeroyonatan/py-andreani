@@ -41,7 +41,7 @@ class API(object):
         # XXX: es obligatorio para el servidor que el parametro "action" este
         # dentro de la cabecera 'Content-Type'
         action = getattr(client.service, metodo).method.soap.action
-        content_type = ('application/soap+xml;action=%s' % action)
+        content_type = ('application/soap+xml;charset=utf-8;action=%s'%action)
         client.set_options(wsse=self.security,
                            headers={'Content-Type': content_type})
         return client
