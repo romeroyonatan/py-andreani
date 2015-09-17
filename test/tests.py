@@ -20,86 +20,165 @@ CONTRATO_CAMBIO = "AND00CMB"
 logging.basicConfig(filename='testing.log', filemode='w', level=logging.DEBUG)
 
 
-class AndreaniTests(TestCase):
+class ConsultarSucursalesTests(TestCase):
+    '''
+    Prueba servicios de consultar sucursales habilitadas para el retiro de
+    paquetes de e-commerce.
+    '''
+    def setUp(self):
+        self.andreani = Andreani(TEST_USER, 
+                                 TEST_PASSWD, 
+                                 CLIENTE,
+                                 CONTRATO_SUCURSAL)
+        
+    def test_sin_filtros(self):
+        '''
+        Busca sucursales sin filtros
+        '''
+        sucursales = self.andreani.consulta_sucursales()
+        self.assertTrue(sucursales)
 
-    def test_consultar_sucursales(self):
+    def test_filtro_codigo_postal(self):
         '''
-        Prueba servicios de consultar sucursales habilitadas para el retiro de
-        paquetes de e-commerce.
+        Busca sucursales por codigo postal.
         '''
-        andreani = Andreani(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_SUCURSAL)
-        # consulta sin filtros
-        sucursales = andreani.consulta_sucursales()
+        sucursales = self.andreani.consulta_sucursales(codigo_postal=1048)
         self.assertTrue(sucursales)
-        # filtro codigo postal
-        sucursales = andreani.consulta_sucursales(codigo_postal=1048)
+
+    def test_filtro_provincia(self):
+        '''
+        Busca sucursales por provincia.
+        '''
+        sucursales = self.andreani.consulta_sucursales(provincia="santa fe")
         self.assertTrue(sucursales)
-        # filtro provincia
-        sucursales = andreani.consulta_sucursales(provincia="santa fe")
+
+    def test_filtro_localidad(self):
+        '''
+        Busca sucursales por localidad.
+        '''
+        sucursales = self.andreani.consulta_sucursales(localidad="rosario")
         self.assertTrue(sucursales)
-        # filtro localidad
-        sucursales = andreani.consulta_sucursales(localidad="rosario")
-        self.assertTrue(sucursales)
-        # filtros combinados
-        sucursales = andreani.consulta_sucursales(codigo_postal=1048,
+
+    def test_filtros_combinados(self):
+        '''
+        Busca sucursales por varios filtros a la vez.
+        '''
+        sucursales = self.andreani.consulta_sucursales(codigo_postal=1048,
                                                   localidad="c.a.b.a.")
         self.assertTrue(sucursales)
-        sucursales = andreani.consulta_sucursales(provincia="santa fe",
+        sucursales = self.andreani.consulta_sucursales(provincia="santa fe",
                                                   localidad="venado tuerto")
         self.assertTrue(sucursales)
-        # todos los filtros
-        sucursales = andreani.consulta_sucursales(provincia="buenos aires",
+
+    def test_todos_los_filtros(self):
+        '''
+        Busca sucursales por todos los filtros.
+        '''
+        sucursales = self.andreani.consulta_sucursales(provincia="buenos aires",
                                                   localidad="san justo",
                                                   codigo_postal=1754)
         self.assertTrue(sucursales)
+
+    def test_sin_resultados(self):
+        '''
+        Busca sucursales por filtros disjuntos y espera como resultado una
+        lista vacia.
+        '''
         # sin resultados
-        sucursales = andreani.consulta_sucursales(provincia="cordoba",
+        sucursales = self.andreani.consulta_sucursales(provincia="cordoba",
                                                   localidad="san justo")
         self.assertFalse(sucursales)
+
+    def test_codigo_postal_invalido(self):
+        '''
+        Busca sucursales por un codigo postal inexistente
+        '''
         # codigo postal invalido
-        sucursales = andreani.consulta_sucursales(codigo_postal="1")
+        sucursales = self.andreani.consulta_sucursales(codigo_postal="1")
         self.assertFalse(sucursales)
 
-    def test_cotizar_envio(self):
+class CotizarEnvioTests(TestCase):
+    '''
+    Prueba servicios de cotizar envios.
+    '''
+
+    def setUp(self):
+        self.andreani = Andreani(TEST_USER, 
+                                 TEST_PASSWD, 
+                                 CLIENTE,
+                                 CONTRATO_SUCURSAL)
+
+    def test_cotizar_envio_domicilio(self):
         '''
-        Prueba servicios de cotizar envios.
+        Cotizacion envio a domicilio.
         '''
-        # cotizacion envio a domicilio
         andreani = Andreani(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_ESTANDAR)
-        cotizacion =  andreani.cotizar_envio(cp_destino="9410", # ushuaia
-                                             peso="1",
-                                             volumen="1")
+        cotizacion = self.andreani.cotizar_envio(cp_destino="9410", # ushuaia
+                                                 peso="1",
+                                                 volumen="1")
         self.assertTrue(cotizacion)
         self.assertTrue(cotizacion['tarifa'])
 
-        # cotizacion envio a sucursal
-        # XXX: webservice falla si no envio cp_destino
-        andreani = Andreani(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_SUCURSAL)
-        cotizacion =  andreani.cotizar_envio(sucursal_retiro="20",
-                                             cp_destino="1754", # san justo
-                                             peso="1000",
-                                             volumen="1000")
-        self.assertTrue(cotizacion)
-        self.assertTrue(cotizacion['tarifa'])
-
-        # codigo postal invalido
-        with self.assertRaises(CodigoPostalInvalido):
-            cotizacion =  andreani.cotizar_envio(cp_destino="1",
+    def test_cotizar_envio_sucursal(self):
+        '''
+        Cotizacion envio a sucursal.
+        '''
+        cotizacion = self.andreani.cotizar_envio(sucursal_retiro="20",
+                                                 cp_destino="1754", # san justo
                                                  peso="1000",
                                                  volumen="1000")
-        # peso o volumen menor que cero
+        self.assertTrue(cotizacion)
+        self.assertTrue(cotizacion['tarifa'])
+
+    def test_codigo_postal_invalido(self):
+        '''
+        Cotizacion con un codigo postal inexistente.
+        '''
+        with self.assertRaises(CodigoPostalInvalido):
+            cotizacion = self.andreani.cotizar_envio(cp_destino="1",
+                                                     peso="1000",
+                                                     volumen="1000")
+
+    def test_volumen_menor_cero(self):
+        '''
+        Cotizacion de un paquete de volumen menor o igual a cero
+        '''
         with self.assertRaises(AndreaniError):
-            cotizacion =  andreani.cotizar_envio(cp_destino="1001",
+            cotizacion = self.andreani.cotizar_envio(cp_destino="1001",
+                                                      peso="10",
+                                                      volumen="0")
+        with self.assertRaises(AndreaniError):
+            cotizacion = self.andreani.cotizar_envio(cp_destino="1001",
+                                                     peso="10",
+                                                     volumen="-1000")
+    def test_peso_menor_cero(self):
+        '''
+        Cotizacion de un paquete de peso menor o igual a cero
+        '''
+        with self.assertRaises(AndreaniError):
+            cotizacion =  self.andreani.cotizar_envio(cp_destino="1001",
                                                  peso="0",
                                                  volumen="1000")
         with self.assertRaises(AndreaniError):
-            cotizacion =  andreani.cotizar_envio(cp_destino="1001",
-                                                 peso="10",
-                                                 volumen="0")
-    def test_confirmar_compra(self):
+            cotizacion =  self.andreani.cotizar_envio(cp_destino="1001",
+                                                      peso="-10",
+                                                      volumen="10")
+class ConfirmarCompraTests(TestCase):
+    '''
+    Prueba servicios de confirmar compra.
+    '''
+
+    def setUp(self):
+        self.andreani = Andreani(TEST_USER, 
+                                 TEST_PASSWD, 
+                                 CLIENTE,
+                                 CONTRATO_SUCURSAL)
+
+    def test_con_cotizacion_envio(self):
         '''
-        Prueba servicio de confirmar compra.
+        Prueba servicio de confirmar compra con cotizacion de envio
         '''
+        # configuro parametros de la compra
         parametros = { 
             'sucursal_retiro': '20',
             'provincia': 'Buenos Aires',
@@ -130,8 +209,6 @@ class AndreaniTests(TestCase):
             'categoria_peso': '',
             'tarifa': '20.0',
         }
-        # confirmacion de compra con cotizacion de envio
-        andreani = Andreani(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_ESTANDAR)
         # XXX: el servidor retorna "Servicio no habilitado"
         with self.assertRaises(AndreaniError):
-            compra = andreani.confirmar_compra(**parametros)
+            compra = self.andreani.confirmar_compra(**parametros)
