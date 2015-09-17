@@ -1,1 +1,2 @@
-pyflakespep8
+pyflakes
+pep8
