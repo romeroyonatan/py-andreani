@@ -19,7 +19,9 @@ CONTRATO_CAMBIO = "AND00CMB"
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 
+
 class AndreaniTests(TestCase):
+
     def test_consultar_sucursales(self):
         andreani = Andreani(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_SUCURSAL)
         sucursales = andreani.consulta_sucursales(codigo_postal=1048)
@@ -30,7 +32,7 @@ class AndreaniTests(TestCase):
     def test_cotizar_envio(self):
         andreani = Andreani(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_SUCURSAL)
         andreani.cotizar_envio(sucursal_retiro="1",
-                               cp_destino = "1048",
-                               peso = "100",
-                               volumen= "100")
+                               cp_destino="1048",
+                               peso="100",
+                               volumen="100")
         self.assertTrue(False)

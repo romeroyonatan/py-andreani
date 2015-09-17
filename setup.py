@@ -20,5 +20,3 @@ setup(name='py-andreani',
       packages=['andreani'],
       install_requires=reqs,
       )
-
-

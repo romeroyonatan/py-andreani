@@ -10,9 +10,11 @@ from suds import null
 
 # modifico namespace del envoltorio soap
 from suds.bindings import binding
-binding.envns=('SOAP-ENV', 'http://www.w3.org/2003/05/soap-envelope')
+binding.envns = ('SOAP-ENV', 'http://www.w3.org/2003/05/soap-envelope')
+
 
 class Andreani(object):
+
     '''
     Implementa los servicios ofrecidos por el webservice de andreani.
     '''
@@ -38,10 +40,9 @@ class Andreani(object):
         client.set_options(wsse=self.security)
         return client
 
-
     def consulta_sucursales(self, codigo_postal=None,
-                                  localidad=None,
-                                  provincia=None):
+                            localidad=None,
+                            provincia=None):
         '''
         Devuelve una lista de sucursales Andreani habilitadas para la entrega
         por mostrador.
@@ -75,17 +76,16 @@ class Andreani(object):
         peso -- float: Expresado en gramos
         volumen -- float: Expresados en centimetros cúbicos
         '''
-        pass
-        # url = "https://www.e-andreani.com/CasaStaging/eCommerce/CotizacionEnvio.svc?wsdl"
-        # client = self.__soap(url)
-        # logging.debug(soap)
-        # result = soap.service.CotizarEnvio(CPDestino=cp_destino,
-                                             # Cliente=self.cliente,
-                                             # Contrato=self.contrato,
-                                             # Peso=peso,
-                                             # SucursalRetiro=sucursal_retiro,
-                                             # Volumen=volumen)
-        # logging.debug(result)
+        url = "https://www.e-andreani.com/CasaStaging/eCommerce/CotizacionEnvio.svc?wsdl"
+        client = self.__soap(url)
+        logging.debug(soap)
+        result = soap.service.CotizarEnvio(CPDestino=cp_destino,
+                                           Cliente=self.cliente,
+                                           Contrato=self.contrato,
+                                           Peso=peso,
+                                           SucursalRetiro=sucursal_retiro,
+                                           Volumen=volumen)
+        logging.debug(result)
 
     def confirmar_compra(self):
         '''
@@ -173,5 +173,3 @@ class Andreani(object):
         como de el retiro en depósito realizado por Andreani.
         '''
         pass
-
-
