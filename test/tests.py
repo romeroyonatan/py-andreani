@@ -1,7 +1,7 @@
 import logging
 
 from unittest import TestCase
-from andreani.andreani import Andreani
+from andreani.andreani import Andreani, CodigoPostalInvalido, AndreaniError
 
 # credenciales de prueba
 TEST_USER = "eCommerce_Integra"
@@ -52,11 +52,40 @@ class AndreaniTests(TestCase):
         sucursales = andreani.consulta_sucursales(provincia="cordoba",
                                                   localidad="san justo")
         self.assertFalse(sucursales)
+        # codigo postal invalido
+        sucursales = andreani.consulta_sucursales(codigo_postal="1")
+        self.assertFalse(sucursales)
 
     def test_cotizar_envio(self):
+        # cotizacion envio a domicilio
+        andreani = Andreani(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_ESTANDAR)
+        cotizacion =  andreani.cotizar_envio(cp_destino="9410", # ushuaia
+                                             peso="1",
+                                             volumen="1")
+        self.assertTrue(cotizacion)
+        self.assertTrue(cotizacion['tarifa'])
+
+        # cotizacion envio a sucursal
+        # XXX: webservice falla si no envio cp_destino
         andreani = Andreani(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_SUCURSAL)
-        andreani.cotizar_envio(sucursal_retiro="1",
-                               cp_destino="1048",
-                               peso="100",
-                               volumen="100")
-        self.assertTrue(False)
+        cotizacion =  andreani.cotizar_envio(sucursal_retiro="20",
+                                             cp_destino="1754", # san justo
+                                             peso="1000",
+                                             volumen="1000")
+        self.assertTrue(cotizacion)
+        self.assertTrue(cotizacion['tarifa'])
+
+        # codigo postal invalido
+        with self.assertRaises(CodigoPostalInvalido):
+            cotizacion =  andreani.cotizar_envio(cp_destino="1",
+                                                 peso="1000",
+                                                 volumen="1000")
+        # peso o volumen menor que cero
+        with self.assertRaises(AndreaniError):
+            cotizacion =  andreani.cotizar_envio(cp_destino="1001",
+                                                 peso="0",
+                                                 volumen="1000")
+        with self.assertRaises(AndreaniError):
+            cotizacion =  andreani.cotizar_envio(cp_destino="1001",
+                                                 peso="10",
+                                                 volumen="0")

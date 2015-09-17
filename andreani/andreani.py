@@ -3,6 +3,7 @@ Implementa los servicios ofrecidos por el webservice de andreani.
 '''
 import logging
 import string
+from gettext import gettext as _
 
 import suds
 from suds.client import Client
@@ -74,7 +75,7 @@ class Andreani(object):
         else:
             return []
 
-    def cotizar_envio(self, sucursal_retiro, cp_destino, peso, volumen):
+    def cotizar_envio(self, peso, volumen, cp_destino, sucursal_retiro=None):
         '''
         Permite cotizar en línea el costo de un envío.
 
@@ -83,22 +84,44 @@ class Andreani(object):
         sucursal_retiro -- integer: Código de "Sucursal Andreani" donde el envío
                                    permanecerá en Custodia. Obligatorio para los
                                    Servicios de Retiro en Sucursal
-        cp_detino -- string: Obligatorio para los Servicios de Envío a Domicilio
+        cp_destino -- string: Obligatorio para los Servicios de Envío a 
+                              Domicilio
         peso -- float: Expresado en gramos
         volumen -- float: Expresados en centimetros cúbicos
         '''
-        pass
-        # url = "https://www.e-andreani.com/CasaStaging/eCommerce/CotizacionEnvio.svc?wsdl"
-        # client = self.__soap(url)
-        # logging.debug(soap)
-        # result = soap.service.CotizarEnvio(CPDestino=cp_destino,
-        # Cliente=self.cliente,
-        # Contrato=self.contrato,
-        # Peso=peso,
-        # SucursalRetiro=sucursal_retiro,
-        # Volumen=volumen)
-        # logging.debug(result)
-
+        self.validar_cotizacion(peso, volumen, cp_destino, sucursal_retiro)
+        # configuro url del wsdl
+        url = ("https://www.e-andreani.com/CasaStaging/eCommerce/" +
+               "CotizacionEnvio.svc?wsdl")
+        soap = self.__soap(url)
+        # configuro content-type de la peticion
+        # XXX: es obligatorio para el servidor que el parametro action este
+        # dentro de la cabecera 'Content-Type'
+        content_type = ('application/soap+xml;charset=UTF-8;action=%s' %
+                        soap.service.CotizarEnvio.method.soap.action)
+        soap.set_options(headers={'Content-Type': content_type})
+        # configuro parametros de la peticion
+        cotizacion_envio = {'CPDestino': cp_destino,
+                            'Cliente': self.cliente,
+                            'Contrato': self.contrato,
+                            'Peso': peso,
+                            'SucursalRetiro': sucursal_retiro,
+                            'Volumen': volumen,
+                           }
+        # obtengo resultado
+        try:
+            result = soap.service.CotizarEnvio(cotizacionEnvio=cotizacion_envio)
+            if result:
+                return self.__to_dict(result)
+            else:
+                return None
+        # tratamiento de excepcion
+        except suds.WebFault as e:
+            text = e.fault.Reason.Text
+            if text == "Codigo postal es invalido":
+                raise CodigoPostalInvalido from e
+            raise AndreaniError(text) from e
+        
     def confirmar_compra(self):
         '''
         Genera un envío en Andreani.
@@ -186,6 +209,15 @@ class Andreani(object):
         '''
         pass
 
+    def validar_cotizacion(self, peso, volumen, codigo_postal, sucursal_retiro):
+        '''
+        Valida parametros para cotizar un envio.
+        '''
+        if float(peso) <= 0:
+            raise AndreaniError(_("Peso debe ser mayor a cero"))
+        if float(volumen) <= 0:
+            raise AndreaniError(_("Volumen debe ser mayor a cero"))
+
     def __to_dict(self, obj):
         '''
         Convierte un objeto en diccionario.
@@ -209,3 +241,8 @@ class Andreani(object):
                 result.append("_")
             result.append(char.lower())
         return ''.join(result)
+
+class CodigoPostalInvalido(ValueError):
+    pass
+class AndreaniError(Exception):
+    pass
