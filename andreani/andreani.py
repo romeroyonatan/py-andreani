@@ -71,10 +71,8 @@ class Andreani(object):
         result = soap.service.ConsultarSucursales(consulta=consulta)
         # devuelvo lista de sucursales
         try:
-            if result:
-                return [self.__to_dict(sucursal) for sucursal in result[0]]
-            else:
-                return []
+            return ([self.__to_dict(sucursal) for sucursal in result[0]] if
+                    result else [])
         except suds.WebFault as e:
             raise AndreaniError(e.fault.Reason.Text) from e
 
@@ -104,36 +102,132 @@ class Andreani(object):
                         soap.service.CotizarEnvio.method.soap.action)
         soap.set_options(headers={'Content-Type': content_type})
         # configuro parametros de la peticion
-        cotizacion_envio = {'CPDestino': cp_destino,
-                            'Cliente': self.cliente,
-                            'Contrato': self.contrato,
-                            'Peso': peso,
-                            'SucursalRetiro': sucursal_retiro,
-                            'Volumen': volumen,
-                           }
+        parametros = {
+            'CPDestino': cp_destino,
+            'Cliente': self.cliente,
+            'Contrato': self.contrato,
+            'Peso': peso,
+            'SucursalRetiro': sucursal_retiro,
+            'Volumen': volumen,
+        }
         # obtengo resultado
         try:
-            result = soap.service.CotizarEnvio(cotizacionEnvio=cotizacion_envio)
-            if result:
-                return self.__to_dict(result)
-            else:
-                return None
-        # tratamiento de excepcion
+            result = soap.service.CotizarEnvio(cotizacionEnvio=parametros)
+            return self.__to_dict(result) if result else None
         except suds.WebFault as e:
             text = e.fault.Reason.Text
             if text == "Codigo postal es invalido":
                 raise CodigoPostalInvalido from e
             raise AndreaniError(text) from e
         
-    def confirmar_compra(self):
+    def confirmar_compra(self, **kwargs):
         '''
         Genera un envío en Andreani.
 
         Asigna un identificador con el cual se va a hacer el seguimiento.
         Luego se debe llamar al WS de Imprimir Constancia para finalizar el
         proceso de Alta del envío.
+
+        params
+        -----------------------
+        sucursal_retiro -- Integer: Código de "Sucursal Andreani" donde el 
+                                    envío permanecerá en Custodia. Obligatorio 
+                                    para los Servicios de Retiro en Sucursal 
+                                    (valor "sucursal" de la consulta de 
+                                    sucursales)
+        provincia -- String
+        localidad -- String
+        codigo_postal -- String: Codigo postal del destino 
+        calle -- String
+        numero -- String
+        departamento -- String
+        piso -- String
+        nombre_apellido -- String
+        tipo_documento -- String
+        numero_documento -- String
+        email -- String
+        numero_celular -- String
+        numero_telefono -- String
+        email -- String
+        nombre_apellido_alternativo -- String
+        numero_transaccion -- String: ID de identificación de envío del Cliente
+        detalle_productos_entrega -- String
+        detalle_productos_retiro -- String
+        peso -- Float: Expresado en Gramos (gr.)
+        volumen -- Float: Expresado en Centímetros Cúbicos (cc3.) (No es
+                          obligatorio si se usan categorías de peso). 
+                          Considerar el volumen del envoltorio/Embalaje.
+        valor_declarado -- Float: Obligatorio para los Servicios que incluye
+                                 seguro en caso de siniestro
+        valor_cobrar -- Float: Obligatorio para los Servicio que incluyen
+                               Gestión Cobranza (pago contrareembolso)
+        sucursal_cliente -- String: Nombre que identifica la sucursal/depósito
+                                    del Cliente. Obligatorio para los Servicios 
+                                    de Retiro en Sucursal Andreani más próxima 
+                                    a la sucursal/depósito de Cliente
+        categoria_distancia -- Integer: Código de categoría para la cotización.
+                                        Obligatorio cuando la tarifas del 
+                                        servicio se cotizan por Categorías de 
+                                        Distancia
+        categoria_facturacion -- Integer: Uso interno
+        categoria_peso -- Integer: Código de categoría para la cotización. 
+                                   Obligatorio cuando la tarifas del servicio 
+                                   se cotizan por Categorías de Peso. (por ej. 
+                                   1.- Zapatos, 2.-Indumentaria)
+        tarifa -- Decimal: Valor de cotización del envío. Sólo se setea 
+                           si se consume el servicio web de Cotización. 
+                           Este valor es de referencia, ya que el sistema 
+                           recalculará la tarifa junto con el alta.
         '''
-        pass
+        # configuro url del wsdl
+        url = ("https://www.e-andreani.com/CasaStaging/eCommerce/" +
+               "ImposicionRemota.svc?wsdl")
+        soap = self.__soap(url)
+        # configuro content-type de la peticion
+        # XXX: es obligatorio para el servidor que el parametro action este
+        # dentro de la cabecera 'Content-Type'
+        content_type = ('application/soap+xml;charset=UTF-8;action=%s' %
+                        soap.service.ConfirmarCompra.method.soap.action)
+        soap.set_options(headers={'Content-Type': content_type})
+        # configuro parametros de la peticion
+        parametros = { 
+            'SucursalRetiro': kwargs.get('sucursal_retiro'),
+            'Provincia': kwargs.get('provincia'),
+            'Localidad': kwargs.get('localidad'),
+            'CodigoPostalDestino': kwargs.get('codigo_postal'),
+            'Calle': kwargs.get('calle'),
+            'Numero': kwargs.get('numero'),
+            'Departamento': kwargs.get('departamento'),
+            'Piso': kwargs.get('piso'),
+            'NombreApellido': kwargs.get('nombre_apellido'),
+            'TipoDocumento': kwargs.get('tipo_documento'),
+            'NumeroDocumento': kwargs.get('numero_documento'),
+            'Email': kwargs.get('email'),
+            'NumeroCelular': kwargs.get('numero_celular'),
+            'NumeroTelefono': kwargs.get('numero_telefono'),
+            'NombreApellidoAlternativo': kwargs.get(
+                'nombre_apellido_alternativo'),
+            'NumeroTransaccion': kwargs.get('numero_transaccion'),
+            'DetalleProductosEntrega': kwargs.get('detalle_productos_entrega'), 
+            'DetalleProductosRetiro': kwargs.get('detalle_productos_retiro'),
+            'Peso': kwargs.get('peso'),
+            'Volumen': kwargs.get('volumen'),
+            'ValorDeclarado': kwargs.get('valor_declarado'),
+            'ValorACobrar': kwargs.get('valor_cobrar'),
+            'Contrato': self.contrato,
+            'SucursalCliente': kwargs.get('sucursal_cliente'),
+            'CategoriaDistancia': kwargs.get('categoria_distancia'),
+            'CategoriaFacturacion': kwargs.get('categoria_facturacion'),
+            'CategoriaPeso': kwargs.get('categoria_peso'),
+            'Tarifa': kwargs.get('tarifa'), 
+        }
+        # obtengo resultado
+        try:
+            result = soap.service.ConfirmarCompra(compra=parametros)
+            return self.__to_dict(result) if result else None
+        # tratamiento de excepcion
+        except suds.WebFault as e:
+            raise AndreaniError(e.fault.Reason.Text) from e
 
     def confirmar_compra_datos_impresion(self):
         '''
