@@ -1,5 +1,6 @@
 import logging
 
+import unittest
 from unittest import TestCase
 from andreani.andreani import Andreani, CodigoPostalInvalido, AndreaniError
 
@@ -174,6 +175,7 @@ class ConfirmarCompraTests(TestCase):
                                  CLIENTE,
                                  CONTRATO_SUCURSAL)
 
+    @unittest.expectedFailure
     def test_con_cotizacion_envio(self):
         '''
         Prueba servicio de confirmar compra con cotizacion de envio
@@ -210,5 +212,5 @@ class ConfirmarCompraTests(TestCase):
             'tarifa': '20.0',
         }
         # XXX: el servidor retorna "Servicio no habilitado"
-        with self.assertRaises(AndreaniError):
-            compra = self.andreani.confirmar_compra(**parametros)
+        compra = self.andreani.confirmar_compra(**parametros)
+        self.assertTrue(compra)
