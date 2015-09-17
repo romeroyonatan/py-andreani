@@ -132,6 +132,6 @@ class AndreaniTests(TestCase):
         }
         # confirmacion de compra con cotizacion de envio
         andreani = Andreani(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_ESTANDAR)
-        compra = andreani.confirmar_compra(**parametros)
-        self.assertTrue(compra)
-        print(compra)
+        # XXX: el servidor retorna "Servicio no habilitado"
+        with self.assertRaises(AndreaniError):
+            compra = andreani.confirmar_compra(**parametros)

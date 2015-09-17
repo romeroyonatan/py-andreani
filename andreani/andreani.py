@@ -104,21 +104,18 @@ class Andreani(object):
                         soap.service.CotizarEnvio.method.soap.action)
         soap.set_options(headers={'Content-Type': content_type})
         # configuro parametros de la peticion
-        cotizacion_envio = {'CPDestino': cp_destino,
-                            'Cliente': self.cliente,
-                            'Contrato': self.contrato,
-                            'Peso': peso,
-                            'SucursalRetiro': sucursal_retiro,
-                            'Volumen': volumen,
-                           }
+        parametros = {
+            'CPDestino': cp_destino,
+            'Cliente': self.cliente,
+            'Contrato': self.contrato,
+            'Peso': peso,
+            'SucursalRetiro': sucursal_retiro,
+            'Volumen': volumen,
+        }
         # obtengo resultado
         try:
-            result = soap.service.CotizarEnvio(cotizacionEnvio=cotizacion_envio)
-            if result:
-                return self.__to_dict(result)
-            else:
-                return None
-        # tratamiento de excepcion
+            result = soap.service.CotizarEnvio(cotizacionEnvio=parametros)
+            return self.__to_dict(result) if result else None
         except suds.WebFault as e:
             text = e.fault.Reason.Text
             if text == "Codigo postal es invalido":
