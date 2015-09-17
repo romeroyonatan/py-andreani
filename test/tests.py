@@ -1,8 +1,8 @@
 import logging
 
 import unittest
+import andreani
 from unittest import TestCase
-from andreani.andreani import Andreani, CodigoPostalInvalido, AndreaniError
 
 # credenciales de prueba
 TEST_USER = "eCommerce_Integra"
@@ -27,10 +27,10 @@ class ConsultarSucursalesTests(TestCase):
     paquetes de e-commerce.
     '''
     def setUp(self):
-        self.andreani = Andreani(TEST_USER, 
-                                 TEST_PASSWD, 
-                                 CLIENTE,
-                                 CONTRATO_SUCURSAL)
+        self.andreani = andreani.API(TEST_USER, 
+                                     TEST_PASSWD, 
+                                     CLIENTE,
+                                     CONTRATO_SUCURSAL)
         
     def test_sin_filtros(self):
         '''
@@ -104,19 +104,19 @@ class CotizarEnvioTests(TestCase):
     '''
 
     def setUp(self):
-        self.andreani = Andreani(TEST_USER, 
-                                 TEST_PASSWD, 
-                                 CLIENTE,
-                                 CONTRATO_SUCURSAL)
+        self.andreani = andreani.API(TEST_USER, 
+                                     TEST_PASSWD, 
+                                     CLIENTE,
+                                     CONTRATO_SUCURSAL)
 
     def test_cotizar_envio_domicilio(self):
         '''
         Cotizacion envio a domicilio.
         '''
-        andreani = Andreani(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_ESTANDAR)
-        cotizacion = self.andreani.cotizar_envio(cp_destino="9410", # ushuaia
-                                                 peso="1",
-                                                 volumen="1")
+        api = andreani.API(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_ESTANDAR)
+        cotizacion = api.cotizar_envio(cp_destino="9410", # ushuaia
+                                       peso="1",
+                                       volumen="1")
         self.assertTrue(cotizacion)
         self.assertTrue(cotizacion['tarifa'])
 
@@ -135,7 +135,7 @@ class CotizarEnvioTests(TestCase):
         '''
         Cotizacion con un codigo postal inexistente.
         '''
-        with self.assertRaises(CodigoPostalInvalido):
+        with self.assertRaises(andreani.CodigoPostalInvalido):
             cotizacion = self.andreani.cotizar_envio(cp_destino="1",
                                                      peso="1000",
                                                      volumen="1000")
@@ -144,11 +144,11 @@ class CotizarEnvioTests(TestCase):
         '''
         Cotizacion de un paquete de volumen menor o igual a cero
         '''
-        with self.assertRaises(AndreaniError):
+        with self.assertRaises(ValueError):
             cotizacion = self.andreani.cotizar_envio(cp_destino="1001",
                                                       peso="10",
                                                       volumen="0")
-        with self.assertRaises(AndreaniError):
+        with self.assertRaises(ValueError):
             cotizacion = self.andreani.cotizar_envio(cp_destino="1001",
                                                      peso="10",
                                                      volumen="-1000")
@@ -156,11 +156,11 @@ class CotizarEnvioTests(TestCase):
         '''
         Cotizacion de un paquete de peso menor o igual a cero
         '''
-        with self.assertRaises(AndreaniError):
+        with self.assertRaises(ValueError):
             cotizacion =  self.andreani.cotizar_envio(cp_destino="1001",
                                                  peso="0",
                                                  volumen="1000")
-        with self.assertRaises(AndreaniError):
+        with self.assertRaises(ValueError):
             cotizacion =  self.andreani.cotizar_envio(cp_destino="1001",
                                                       peso="-10",
                                                       volumen="10")
@@ -170,10 +170,10 @@ class ConfirmarCompraTests(TestCase):
     '''
 
     def setUp(self):
-        self.andreani = Andreani(TEST_USER, 
-                                 TEST_PASSWD, 
-                                 CLIENTE,
-                                 CONTRATO_SUCURSAL)
+        self.andreani = andreani.API(TEST_USER, 
+                                     TEST_PASSWD, 
+                                     CLIENTE,
+                                     CONTRATO_SUCURSAL)
 
     @unittest.expectedFailure
     def test_con_cotizacion_envio(self):

@@ -12,11 +12,14 @@ reqs = [str(ir.req) for ir in install_reqs]
 
 setup(name='py-andreani',
       version='0.1',
-      description='Implemeta servicios ofrecidos por API de Andreani',
+      description='Implementa servicios ofrecidos por API de Andreani',
       author='Yonatan Romero',
       author_email='yromero@openmailbox.org',
+      license='GPLv2',
       url='https://github.com/romeroyonatan/py-andreani',
       platforms="Python3",
+      keywords="andreani e-commerce argentina oca",
       packages=['andreani'],
       install_requires=reqs,
+      test_suite="test",
       )

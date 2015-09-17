@@ -13,8 +13,7 @@ from suds.wsse import UsernameToken, Security
 from suds.bindings import binding
 binding.envns = ('SOAP-ENV', 'http://www.w3.org/2003/05/soap-envelope')
 
-
-class Andreani(object):
+class API(object):
 
     '''
     Implementa los servicios ofrecidos por el webservice de andreani.
@@ -74,7 +73,7 @@ class Andreani(object):
             return ([self.__to_dict(sucursal) for sucursal in result[0]] if
                     result else [])
         except suds.WebFault as e:
-            raise AndreaniError(e.fault.Reason.Text) from e
+            raise APIError(e.fault.Reason.Text) from e
 
     def cotizar_envio(self, peso, volumen, cp_destino, sucursal_retiro=None):
         '''
@@ -118,7 +117,7 @@ class Andreani(object):
             text = e.fault.Reason.Text
             if text == "Codigo postal es invalido":
                 raise CodigoPostalInvalido from e
-            raise AndreaniError(text) from e
+            raise APIError(text) from e
         
     def confirmar_compra(self, **kwargs):
         '''
@@ -227,7 +226,7 @@ class Andreani(object):
             return self.__to_dict(result) if result else None
         # tratamiento de excepcion
         except suds.WebFault as e:
-            raise AndreaniError(e.fault.Reason.Text) from e
+            raise APIError(e.fault.Reason.Text) from e
 
     def confirmar_compra_datos_impresion(self):
         '''
@@ -311,9 +310,9 @@ class Andreani(object):
         Valida parametros para cotizar un envio.
         '''
         if float(peso) <= 0:
-            raise AndreaniError(_("Peso debe ser mayor a cero"))
+            raise ValueError(_("Peso debe ser mayor a cero"))
         if float(volumen) <= 0:
-            raise AndreaniError(_("Volumen debe ser mayor a cero"))
+            raise ValueError(_("Volumen debe ser mayor a cero"))
 
     def __to_dict(self, obj):
         '''
@@ -341,5 +340,5 @@ class Andreani(object):
 
 class CodigoPostalInvalido(ValueError):
     pass
-class AndreaniError(Exception):
+class APIError(Exception):
     pass
