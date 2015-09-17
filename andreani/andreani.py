@@ -2,6 +2,7 @@
 Implementa los servicios ofrecidos por el webservice de andreani.
 '''
 import logging
+import string
 
 import suds
 from suds.client import Client
@@ -68,7 +69,7 @@ class Andreani(object):
         result = soap.service.ConsultarSucursales(consulta=consulta)
         # devuelvo lista de sucursales
         if result:
-            return result[0] #XXX: WS devuelve un array de array
+            return [self.__to_dict(sucursal) for sucursal in result[0]]
         else:
             return []
 
@@ -184,4 +185,27 @@ class Andreani(object):
         '''
         pass
 
+    def __to_dict(self, obj):
+        '''
+        Convierte un objeto en diccionario.
+        '''
+        _dict = {}
+        # itero sobre los atributos del objeto
+        for attr in dir(obj):
+            # si no es un atributo de python y no es una funcion
+            if not attr.startswith('__') and not callable(getattr(obj, attr)):
+                # agrego el atributo al diccionario
+                _dict[self.__pythonize(attr)] = getattr(obj, attr)
+        return _dict
+
+    def __pythonize(self, attr):
+        '''
+        Pythoniza el nombre de un atributo de formato CamelCase a under_score.
+        '''
+        result = [attr[0].lower()]
+        for char in attr[1:]:
+            if char in string.ascii_uppercase:
+                result.append("_")
+            result.append(char.lower())
+        return ''.join(result)
 
