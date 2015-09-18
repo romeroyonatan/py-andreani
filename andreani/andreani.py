@@ -14,11 +14,19 @@ from suds.bindings import binding
 binding.envns = ('SOAP-ENV', 'http://www.w3.org/2003/05/soap-envelope')
 
 class API(object):
-
+    
     '''
     Implementa los servicios ofrecidos por el webservice de andreani.
     '''
 
+    DEBUG = False
+    URL = {
+        'Staging': {
+            'consultar_sucursales': ('https://www.e-andreani.com/CasaStaging/eCommerce/ConsultaSucursales.svc?wsdl', 'ConsultarSucursales'),
+            'cotizar_envio': ('https://www.e-andreani.com/CasaStaging/eCommerce/CotizacionEnvio.svc?wsdl', 'CotizarEnvio'),
+            'confirmar_compra':( 'https://www.e-andreani.com/CasaStaging/eCommerce/ImposicionRemota.svc?wsdl', 'ConfirmarCompra'),
+        },
+    }
     def __init__(self, username, password, cliente, contrato):
         '''
         Inicializa datos del objeto
@@ -32,31 +40,36 @@ class API(object):
         # numero de servicio andreani
         self.contrato = contrato
 
-    def __soap(self, url, metodo):
+    def __soap(self, peticion, **kwargs):
         '''
-        Obtiene un cliente SOAP para utilizar.
+        Realiza la peticion SOAP y devuelve el resultado
         '''
-        client = Client(url)
-        # configuro content-type de la peticion
-        # XXX: es obligatorio para el servidor que el parametro "action" este
-        # dentro de la cabecera 'Content-Type'
-        action = getattr(client.service, metodo).method.soap.action
-        content_type = ('application/soap+xml;charset=utf-8;action=%s'%action)
-        client.set_options(wsse=self.security,
-                           headers={'Content-Type': content_type})
-        return client
+        try:
+            # obtengo url del wsdl y nombre de metodo a llamar
+            wsdl, metodo = self.__get_wsdl(peticion)
+            soap = Client(wsdl)
+            # configuro content-type de la peticion
+            # XXX: es obligatorio para el servidor que el parametro "action" 
+            # este dentro de la cabecera 'Content-Type'
+            metodo = getattr(soap.service, metodo)
+            action = metodo.method.soap.action
+            ct = ('application/soap+xml;charset=utf-8;action=%s' % action)
+            soap.set_options(wsse=self.security, headers={'Content-Type': ct})
+            return metodo(**kwargs)
+        except suds.WebFault as e:
+            text = e.fault.Reason.Text
+            if text == "Codigo postal es invalido":
+                raise CodigoPostalInvalido from e
+            raise APIError(text) from e
 
-    def consulta_sucursales(self, codigo_postal=None,
-                            localidad=None,
-                            provincia=None):
+    def consultar_sucursales(self, 
+                             codigo_postal=None,
+                             localidad=None,
+                             provincia=None):
         '''
         Devuelve una lista de sucursales Andreani habilitadas para la entrega
         por mostrador.
         '''
-        # configuro url del wsdl
-        url = ("https://www.e-andreani.com/CasaStaging/eCommerce/" +
-               "ConsultaSucursales.svc?wsdl")
-        soap = self.__soap(url, 'ConsultarSucursales')
         # configuro parametros de la consulta
         if codigo_postal or localidad or provincia:
             consulta = {'CodigoPostal': codigo_postal,
@@ -67,13 +80,9 @@ class API(object):
             # excepcion si el parametro <consulta> no esta en la peticion
             consulta = {'CodigoPostal': suds.null()}
         # realizo la consulta y obtengo el resultado
-        result = soap.service.ConsultarSucursales(consulta=consulta)
+        r = self.__soap('consultar_sucursales', consulta=consulta)
         # devuelvo lista de sucursales
-        try:
-            return ([self.__to_dict(sucursal) for sucursal in result[0]] if
-                    result else [])
-        except suds.WebFault as e:
-            raise APIError(e.fault.Reason.Text) from e
+        return ([self.__to_dict(sucursal) for sucursal in r[0]] if r else [])
 
     def cotizar_envio(self, peso, volumen, cp_destino, sucursal_retiro=None):
         '''
@@ -90,10 +99,6 @@ class API(object):
         volumen -- float: Expresados en centimetros cúbicos
         '''
         self.validar_cotizacion(peso, volumen, cp_destino, sucursal_retiro)
-        # configuro url del wsdl
-        url = ("https://www.e-andreani.com/CasaStaging/eCommerce/" +
-               "CotizacionEnvio.svc?wsdl")
-        soap = self.__soap(url, "CotizarEnvio")
         # configuro parametros de la peticion
         parametros = {
             'CPDestino': cp_destino,
@@ -104,14 +109,8 @@ class API(object):
             'Volumen': volumen,
         }
         # obtengo resultado
-        try:
-            result = soap.service.CotizarEnvio(cotizacionEnvio=parametros)
-            return self.__to_dict(result) if result else None
-        except suds.WebFault as e:
-            text = e.fault.Reason.Text
-            if text == "Codigo postal es invalido":
-                raise CodigoPostalInvalido from e
-            raise APIError(text) from e
+        response = self.__soap("cotizar_envio", cotizacionEnvio=parametros)
+        return self.__to_dict(response) if response else None
         
     def confirmar_compra(self, **kwargs):
         '''
@@ -172,10 +171,6 @@ class API(object):
                            Este valor es de referencia, ya que el sistema 
                            recalculará la tarifa junto con el alta.
         '''
-        # configuro url del wsdl
-        url = ("https://www.e-andreani.com/CasaStaging/eCommerce/" +
-               "ImposicionRemota.svc?wsdl")
-        soap = self.__soap(url, "ConfirmarCompra")
         # configuro parametros de la peticion
         parametros = { 
             'SucursalRetiro': kwargs.get('sucursal_retiro'),
@@ -209,12 +204,8 @@ class API(object):
             'Tarifa': kwargs.get('tarifa'), 
         }
         # obtengo resultado
-        try:
-            result = soap.service.ConfirmarCompra(compra=parametros)
-            return self.__to_dict(result) if result else None
-        # tratamiento de excepcion
-        except suds.WebFault as e:
-            raise APIError(e.fault.Reason.Text) from e
+        response = self.__soap("confirmar_compra", compra=parametros)
+        return self.__to_dict(response) if response else None
 
     def confirmar_compra_datos_impresion(self):
         '''
@@ -325,6 +316,17 @@ class API(object):
                 result.append("_")
             result.append(char.lower())
         return ''.join(result)
+    
+    def __get_wsdl(self, peticion):
+        '''
+        Obtiene la URL del WSDL y el nombre del metodo para la peticion 
+        dada. Tiene en cuenta el ambiente en el que se ejecuta.
+        '''
+        if self.DEBUG:
+            return self.URL['Staging'][peticion]
+
+
+
 
 class CodigoPostalInvalido(ValueError):
     pass

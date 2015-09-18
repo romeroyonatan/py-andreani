@@ -31,43 +31,44 @@ class ConsultarSucursalesTests(TestCase):
                                      TEST_PASSWD, 
                                      CLIENTE,
                                      CONTRATO_SUCURSAL)
+        self.andreani.DEBUG = True
         
     def test_sin_filtros(self):
         '''
         Busca sucursales sin filtros
         '''
-        sucursales = self.andreani.consulta_sucursales()
+        sucursales = self.andreani.consultar_sucursales()
         self.assertTrue(sucursales)
 
     def test_filtro_codigo_postal(self):
         '''
         Busca sucursales por codigo postal.
         '''
-        sucursales = self.andreani.consulta_sucursales(codigo_postal=1048)
+        sucursales = self.andreani.consultar_sucursales(codigo_postal=1048)
         self.assertTrue(sucursales)
 
     def test_filtro_provincia(self):
         '''
         Busca sucursales por provincia.
         '''
-        sucursales = self.andreani.consulta_sucursales(provincia="santa fe")
+        sucursales = self.andreani.consultar_sucursales(provincia="santa fe")
         self.assertTrue(sucursales)
 
     def test_filtro_localidad(self):
         '''
         Busca sucursales por localidad.
         '''
-        sucursales = self.andreani.consulta_sucursales(localidad="rosario")
+        sucursales = self.andreani.consultar_sucursales(localidad="rosario")
         self.assertTrue(sucursales)
 
     def test_filtros_combinados(self):
         '''
         Busca sucursales por varios filtros a la vez.
         '''
-        sucursales = self.andreani.consulta_sucursales(codigo_postal=1048,
+        sucursales = self.andreani.consultar_sucursales(codigo_postal=1048,
                                                   localidad="c.a.b.a.")
         self.assertTrue(sucursales)
-        sucursales = self.andreani.consulta_sucursales(provincia="santa fe",
+        sucursales = self.andreani.consultar_sucursales(provincia="santa fe",
                                                   localidad="venado tuerto")
         self.assertTrue(sucursales)
 
@@ -75,7 +76,7 @@ class ConsultarSucursalesTests(TestCase):
         '''
         Busca sucursales por todos los filtros.
         '''
-        sucursales = self.andreani.consulta_sucursales(provincia="buenos aires",
+        sucursales = self.andreani.consultar_sucursales(provincia="buenos aires",
                                                   localidad="san justo",
                                                   codigo_postal=1754)
         self.assertTrue(sucursales)
@@ -86,7 +87,7 @@ class ConsultarSucursalesTests(TestCase):
         lista vacia.
         '''
         # sin resultados
-        sucursales = self.andreani.consulta_sucursales(provincia="cordoba",
+        sucursales = self.andreani.consultar_sucursales(provincia="cordoba",
                                                   localidad="san justo")
         self.assertFalse(sucursales)
 
@@ -95,7 +96,7 @@ class ConsultarSucursalesTests(TestCase):
         Busca sucursales por un codigo postal inexistente
         '''
         # codigo postal invalido
-        sucursales = self.andreani.consulta_sucursales(codigo_postal="1")
+        sucursales = self.andreani.consultar_sucursales(codigo_postal="1")
         self.assertFalse(sucursales)
 
 class CotizarEnvioTests(TestCase):
@@ -108,12 +109,14 @@ class CotizarEnvioTests(TestCase):
                                      TEST_PASSWD, 
                                      CLIENTE,
                                      CONTRATO_SUCURSAL)
+        self.andreani.DEBUG = True
 
     def test_cotizar_envio_domicilio(self):
         '''
         Cotizacion envio a domicilio.
         '''
         api = andreani.API(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_ESTANDAR)
+        api.DEBUG = True
         cotizacion = api.cotizar_envio(cp_destino="9410", # ushuaia
                                        peso="1",
                                        volumen="1")
@@ -174,8 +177,8 @@ class ConfirmarCompraTests(TestCase):
                                      TEST_PASSWD, 
                                      CLIENTE,
                                      CONTRATO_SUCURSAL)
+        self.andreani.DEBUG = True
 
-    @unittest.expectedFailure
     def test_con_cotizacion_envio(self):
         '''
         Prueba servicio de confirmar compra con cotizacion de envio
@@ -214,3 +217,4 @@ class ConfirmarCompraTests(TestCase):
         # XXX: el servidor retorna "Servicio no habilitado"
         compra = self.andreani.confirmar_compra(**parametros)
         self.assertTrue(compra)
+        print (compra)
