@@ -1,5 +1,9 @@
 # py-andreani
+
 [![Coverage Status](https://coveralls.io/repos/romeroyonatan/py-andreani/badge.svg?branch=master&service=github)](https://coveralls.io/github/romeroyonatan/py-andreani?branch=master)
+
+[![Build Status](https://travis-ci.org/romeroyonatan/py-andreani.svg?branch=master)](https://travis-ci.org/romeroyonatan/py-andreani)
+
 Modulo python para comunicacion con API de Andreani.
 
 Basado en el versión 2.0 de la API
