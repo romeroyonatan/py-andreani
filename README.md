@@ -11,6 +11,7 @@ Basado en el versión 2.0 de la API
 ## Instalación
 ```bash
 git clone git@github.com:romeroyonatan/py-andreani.git
+cd py-andreani
 python setup.py install
 ```
 
