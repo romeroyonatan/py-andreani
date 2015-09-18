@@ -58,9 +58,10 @@ class API(object):
             # XXX: es obligatorio para el servidor que el parametro "action"
             # este dentro de la cabecera 'Content-Type'
             metodo = getattr(soap.service, metodo)
-            action = metodo.method.soap.action
-            ct = ('application/soap+xml;charset=utf-8;action=%s' % action)
-            soap.set_options(wsse=self.security, headers={'Content-Type': ct})
+            soap.set_options(wsse=self.security,
+                             headers={'Content-Type':
+            'application/soap+xml;charset=utf-8;action=%s' %
+            metodo.method.soap.action})
             return metodo(**kwargs)
         except suds.WebFault as e:
             text = e.fault.Reason.Text
