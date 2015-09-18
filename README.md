@@ -11,9 +11,7 @@ Basado en el versión 2.0 de la API
 ## Instalación
 ```bash
 git clone git@github.com:romeroyonatan/py-andreani.git
-mkdir ~/venv/
-virtualenv -p python3 ~/venv/py-andreani/
-source ~/venv/py-andreani/bin/activate
+cd py-andreani
 python setup.py install
 ```
 
