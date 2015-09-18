@@ -3,14 +3,13 @@ Implementa los servicios ofrecidos por el webservice de andreani.
 '''
 import logging
 import string
-from gettext import gettext as _
 
-import suds
-from suds.client import Client
-from suds.wsse import UsernameToken, Security
+from . import validator
 
-# modifico namespace del envoltorio soap
+import suds.client
+import suds.wsse
 from suds.bindings import binding
+# modifico namespace del envoltorio soap
 binding.envns = ('SOAP-ENV', 'http://www.w3.org/2003/05/soap-envelope')
 
 class API(object):
@@ -32,8 +31,8 @@ class API(object):
         Inicializa datos del objeto
         '''
         # guardo token generado como atributo del objeto
-        token = UsernameToken(username, password)
-        self.security = Security()
+        token = suds.wsse.UsernameToken(username, password)
+        self.security = suds.wsse.Security()
         self.security.tokens.append(token)
         # numero de cliente
         self.cliente = cliente
@@ -47,7 +46,7 @@ class API(object):
         try:
             # obtengo url del wsdl y nombre de metodo a llamar
             wsdl, metodo = self.__get_wsdl(peticion)
-            soap = Client(wsdl)
+            soap = suds.client.Client(wsdl)
             # configuro content-type de la peticion
             # XXX: es obligatorio para el servidor que el parametro "action" 
             # este dentro de la cabecera 'Content-Type'
@@ -84,6 +83,8 @@ class API(object):
         # devuelvo lista de sucursales
         return ([self.__to_dict(sucursal) for sucursal in r[0]] if r else [])
 
+    @validator.gt("peso", 0)
+    @validator.gt("volumen", 0)
     def cotizar_envio(self, peso, volumen, cp_destino, sucursal_retiro=None):
         '''
         Permite cotizar en línea el costo de un envío.
@@ -98,7 +99,6 @@ class API(object):
         peso -- float: Expresado en gramos
         volumen -- float: Expresados en centimetros cúbicos
         '''
-        self.validar_cotizacion(peso, volumen, cp_destino, sucursal_retiro)
         # configuro parametros de la peticion
         parametros = {
             'CPDestino': cp_destino,
@@ -284,15 +284,6 @@ class API(object):
         '''
         pass
 
-    def validar_cotizacion(self, peso, volumen, codigo_postal, sucursal_retiro):
-        '''
-        Valida parametros para cotizar un envio.
-        '''
-        if float(peso) <= 0:
-            raise ValueError(_("Peso debe ser mayor a cero"))
-        if float(volumen) <= 0:
-            raise ValueError(_("Volumen debe ser mayor a cero"))
-
     def __to_dict(self, obj):
         '''
         Convierte un objeto en diccionario.
@@ -324,9 +315,6 @@ class API(object):
         '''
         if self.DEBUG:
             return self.URL['Staging'][peticion]
-
-
-
 
 class CodigoPostalInvalido(ValueError):
     pass
