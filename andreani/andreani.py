@@ -23,7 +23,8 @@ class API(object):
         'Staging': {
             'consultar_sucursales': ('https://www.e-andreani.com/CasaStaging/eCommerce/ConsultaSucursales.svc?wsdl', 'ConsultarSucursales'),
             'cotizar_envio': ('https://www.e-andreani.com/CasaStaging/eCommerce/CotizacionEnvio.svc?wsdl', 'CotizarEnvio'),
-            'confirmar_compra':( 'https://www.e-andreani.com/CasaStaging/eCommerce/ImposicionRemota.svc?wsdl', 'ConfirmarCompra'),
+            'confirmar_compra': ('https://www.e-andreani.com/CasaStaging/eCommerce/ImposicionRemota.svc?wsdl', 'ConfirmarCompra'),
+            'confirmar_compra_datos_impresion': ('https://www.e-andreani.com/CasaStaging/eCommerce/ImposicionRemota.svc?wsdl', 'ConfirmarCompraConRecibo'),
         },
     }
     def __init__(self, username, password, cliente, contrato):
@@ -207,7 +208,7 @@ class API(object):
         response = self.__soap("confirmar_compra", compra=parametros)
         return self.__to_dict(response) if response else None
 
-    def confirmar_compra_datos_impresion(self):
+    def confirmar_compra_datos_impresion(self, **kwargs):
         '''
         Genera un envío y devuelve todos los datos necesarios para
         que el cliente imprima la etiqueta del bulto.
@@ -216,8 +217,95 @@ class API(object):
         El uso de este Web Services es recomendado para cliente que
         tienen altas intensivas y un proceso de preparación que
         necesita agilidad
+
+        params
+        -----------------------
+        sucursal_retiro -- Integer: Código de "Sucursal Andreani" donde el 
+                                    envío permanecerá en Custodia. Obligatorio 
+                                    para los Servicios de Retiro en Sucursal 
+                                    (valor "sucursal" de la consulta de 
+                                    sucursales)
+        provincia -- String
+        localidad -- String
+        codigo_postal -- String: Codigo postal del destino 
+        calle -- String
+        numero -- String
+        departamento -- String
+        piso -- String
+        nombre_apellido -- String
+        tipo_documento -- String
+        numero_documento -- String
+        email -- String
+        numero_celular -- String
+        numero_telefono -- String
+        email -- String
+        nombre_apellido_alternativo -- String
+        numero_transaccion -- String: ID de identificación de envío del Cliente
+        detalle_productos_entrega -- String
+        detalle_productos_retiro -- String
+        peso -- Float: Expresado en Gramos (gr.)
+        volumen -- Float: Expresado en Centímetros Cúbicos (cc3.) (No es
+                          obligatorio si se usan categorías de peso). 
+                          Considerar el volumen del envoltorio/Embalaje.
+        valor_declarado -- Float: Obligatorio para los Servicios que incluye
+                                 seguro en caso de siniestro
+        valor_cobrar -- Float: Obligatorio para los Servicio que incluyen
+                               Gestión Cobranza (pago contrareembolso)
+        sucursal_cliente -- String: Nombre que identifica la sucursal/depósito
+                                    del Cliente. Obligatorio para los Servicios 
+                                    de Retiro en Sucursal Andreani más próxima 
+                                    a la sucursal/depósito de Cliente
+        categoria_distancia -- Integer: Código de categoría para la cotización.
+                                        Obligatorio cuando la tarifas del 
+                                        servicio se cotizan por Categorías de 
+                                        Distancia
+        categoria_facturacion -- Integer: Uso interno
+        categoria_peso -- Integer: Código de categoría para la cotización. 
+                                   Obligatorio cuando la tarifas del servicio 
+                                   se cotizan por Categorías de Peso. (por ej. 
+                                   1.- Zapatos, 2.-Indumentaria)
+        tarifa -- Decimal: Valor de cotización del envío. Sólo se setea 
+                           si se consume el servicio web de Cotización. 
+                           Este valor es de referencia, ya que el sistema 
+                           recalculará la tarifa junto con el alta.
         '''
-        pass
+        # configuro parametros de la peticion
+        parametros = { 
+            'SucursalRetiro': kwargs.get('sucursal_retiro'),
+            'Provincia': kwargs.get('provincia'),
+            'Localidad': kwargs.get('localidad'),
+            'CodigoPostalDestino': kwargs.get('codigo_postal'),
+            'Calle': kwargs.get('calle'),
+            'Numero': kwargs.get('numero'),
+            'Departamento': kwargs.get('departamento'),
+            'Piso': kwargs.get('piso'),
+            'NombreApellido': kwargs.get('nombre_apellido'),
+            'TipoDocumento': kwargs.get('tipo_documento'),
+            'NumeroDocumento': kwargs.get('numero_documento'),
+            'Email': kwargs.get('email'),
+            'NumeroCelular': kwargs.get('numero_celular'),
+            'NumeroTelefono': kwargs.get('numero_telefono'),
+            'NombreApellidoAlternativo': kwargs.get(
+                'nombre_apellido_alternativo'),
+            'NumeroTransaccion': kwargs.get('numero_transaccion'),
+            'DetalleProductosEntrega': kwargs.get('detalle_productos_entrega'), 
+            'DetalleProductosRetiro': kwargs.get('detalle_productos_retiro'),
+            'Peso': kwargs.get('peso'),
+            'Volumen': kwargs.get('volumen'),
+            'ValorDeclarado': kwargs.get('valor_declarado'),
+            'ValorACobrar': kwargs.get('valor_cobrar'),
+            'Contrato': self.contrato,
+            'SucursalCliente': kwargs.get('sucursal_cliente'),
+            'CategoriaDistancia': kwargs.get('categoria_distancia'),
+            'CategoriaFacturacion': kwargs.get('categoria_facturacion'),
+            'CategoriaPeso': kwargs.get('categoria_peso'),
+            'Tarifa': kwargs.get('tarifa'), 
+            'NumeroRecibo': kwargs.get('numero_recibo'), 
+        }
+        # obtengo resultado
+        response = self.__soap("confirmar_compra_datos_impresion", 
+                               compra=parametros)
+        return self.__to_dict(response) if response else None
 
     def consultas_codigo_postal(self):
         '''

@@ -179,12 +179,8 @@ class ConfirmarCompraTests(TestCase):
                                      CONTRATO_SUCURSAL)
         self.andreani.DEBUG = True
 
-    def test_con_cotizacion_envio(self):
-        '''
-        Prueba servicio de confirmar compra con cotizacion de envio
-        '''
         # configuro parametros de la compra
-        parametros = { 
+        self.parametros = { 
             'sucursal_retiro': '20',
             'provincia': 'Buenos Aires',
             'localidad': 'San Justo',
@@ -214,7 +210,19 @@ class ConfirmarCompraTests(TestCase):
             'categoria_peso': '',
             'tarifa': '20.0',
         }
-        # XXX: el servidor retorna "Servicio no habilitado"
-        compra = self.andreani.confirmar_compra(**parametros)
+
+    def test_con_cotizacion_envio(self):
+        '''
+        Prueba servicio de confirmar compra con cotizacion de envio
+        '''
+        compra = self.andreani.confirmar_compra(**self.parametros)
+        self.assertTrue(compra)
+
+    def test_con_datos_impresion(self):
+        '''
+        Prueba servicio de confirmar compra con cotizacion de envio
+        '''
+        self.parametros['numero_recibo'] = "1"
+        compra = self.andreani.confirmar_compra_datos_impresion(**self.parametros)
         self.assertTrue(compra)
 
