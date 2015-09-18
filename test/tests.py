@@ -217,4 +217,4 @@ class ConfirmarCompraTests(TestCase):
         # XXX: el servidor retorna "Servicio no habilitado"
         compra = self.andreani.confirmar_compra(**parametros)
         self.assertTrue(compra)
-        print (compra)
+

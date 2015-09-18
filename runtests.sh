@@ -17,7 +17,7 @@ pep8 --exclude=migrations,lib,static,.ropeproject --ignore=E501,E225,E128,E124 .
 echo "##"
 
 echo "## Tests:"
-python -m unittest
-
+coverage run --source="andreani" setup.py test
+coverage report -m
 echo "##"
 

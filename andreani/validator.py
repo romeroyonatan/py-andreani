@@ -7,7 +7,6 @@ Todos los validadores son decoradores de metodos de objetos.
 from gettext import gettext as _
 
 class gt(object):
-
     '''
     Validador "mayor que".
     '''
