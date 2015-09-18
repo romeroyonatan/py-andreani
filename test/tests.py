@@ -1,6 +1,5 @@
 import logging
 
-import unittest
 import andreani
 from unittest import TestCase
 
@@ -27,12 +26,12 @@ class ConsultarSucursalesTests(TestCase):
     paquetes de e-commerce.
     '''
     def setUp(self):
-        self.andreani = andreani.API(TEST_USER, 
-                                     TEST_PASSWD, 
+        self.andreani = andreani.API(TEST_USER,
+                                     TEST_PASSWD,
                                      CLIENTE,
                                      CONTRATO_SUCURSAL)
         self.andreani.DEBUG = True
-        
+
     def test_sin_filtros(self):
         '''
         Busca sucursales sin filtros
@@ -76,9 +75,9 @@ class ConsultarSucursalesTests(TestCase):
         '''
         Busca sucursales por todos los filtros.
         '''
-        sucursales = self.andreani.consultar_sucursales(provincia="buenos aires",
-                                                  localidad="san justo",
-                                                  codigo_postal=1754)
+        sucursales = self.andreani.consultar_sucursales(codigo_postal=1754,
+                                                        provincia="buenos",
+                                                        localidad="san justo")
         self.assertTrue(sucursales)
 
     def test_sin_resultados(self):
@@ -99,14 +98,15 @@ class ConsultarSucursalesTests(TestCase):
         sucursales = self.andreani.consultar_sucursales(codigo_postal="1")
         self.assertFalse(sucursales)
 
+
 class CotizarEnvioTests(TestCase):
     '''
     Prueba servicios de cotizar envios.
     '''
 
     def setUp(self):
-        self.andreani = andreani.API(TEST_USER, 
-                                     TEST_PASSWD, 
+        self.andreani = andreani.API(TEST_USER,
+                                     TEST_PASSWD,
                                      CLIENTE,
                                      CONTRATO_SUCURSAL)
         self.andreani.DEBUG = True
@@ -117,7 +117,7 @@ class CotizarEnvioTests(TestCase):
         '''
         api = andreani.API(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_ESTANDAR)
         api.DEBUG = True
-        cotizacion = api.cotizar_envio(cp_destino="9410", # ushuaia
+        cotizacion = api.cotizar_envio(cp_destino="9410",  # ushuaia
                                        peso="1",
                                        volumen="1")
         self.assertTrue(cotizacion)
@@ -128,7 +128,7 @@ class CotizarEnvioTests(TestCase):
         Cotizacion envio a sucursal.
         '''
         cotizacion = self.andreani.cotizar_envio(sucursal_retiro="20",
-                                                 cp_destino="1754", # san justo
+                                                 cp_destino="1754",  # san justo
                                                  peso="1000",
                                                  volumen="1000")
         self.assertTrue(cotizacion)
@@ -139,48 +139,51 @@ class CotizarEnvioTests(TestCase):
         Cotizacion con un codigo postal inexistente.
         '''
         with self.assertRaises(andreani.CodigoPostalInvalido):
-            cotizacion = self.andreani.cotizar_envio(cp_destino="1",
-                                                     peso="1000",
-                                                     volumen="1000")
+            self.andreani.cotizar_envio(cp_destino="1",
+                                        peso="1000",
+                                        volumen="1000")
 
     def test_volumen_menor_cero(self):
         '''
         Cotizacion de un paquete de volumen menor o igual a cero
         '''
         with self.assertRaises(ValueError):
-            cotizacion = self.andreani.cotizar_envio(cp_destino="1001",
-                                                      peso="10",
-                                                      volumen="0")
+            self.andreani.cotizar_envio(cp_destino="1001",
+                                        peso="10",
+                                        volumen="0")
         with self.assertRaises(ValueError):
-            cotizacion = self.andreani.cotizar_envio(cp_destino="1001",
-                                                     peso="10",
-                                                     volumen="-1000")
+            self.andreani.cotizar_envio(cp_destino="1001",
+                                        peso="10",
+                                        volumen="-1000")
+
     def test_peso_menor_cero(self):
         '''
         Cotizacion de un paquete de peso menor o igual a cero
         '''
         with self.assertRaises(ValueError):
-            cotizacion =  self.andreani.cotizar_envio(cp_destino="1001",
-                                                 peso="0",
-                                                 volumen="1000")
+            self.andreani.cotizar_envio(cp_destino="1001",
+                                        peso="0",
+                                        volumen="1000")
         with self.assertRaises(ValueError):
-            cotizacion =  self.andreani.cotizar_envio(cp_destino="1001",
-                                                      peso="-10",
-                                                      volumen="10")
+            self.andreani.cotizar_envio(cp_destino="1001",
+                                        peso="-10",
+                                        volumen="10")
+
+
 class ConfirmarCompraTests(TestCase):
     '''
     Prueba servicios de confirmar compra.
     '''
 
     def setUp(self):
-        self.andreani = andreani.API(TEST_USER, 
-                                     TEST_PASSWD, 
+        self.andreani = andreani.API(TEST_USER,
+                                     TEST_PASSWD,
                                      CLIENTE,
                                      CONTRATO_SUCURSAL)
         self.andreani.DEBUG = True
 
         # configuro parametros de la compra
-        self.parametros = { 
+        self.parametros = {
             'sucursal_retiro': '20',
             'provincia': 'Buenos Aires',
             'localidad': 'San Justo',
@@ -220,9 +223,9 @@ class ConfirmarCompraTests(TestCase):
 
     def test_con_datos_impresion(self):
         '''
-        Prueba servicio de confirmar compra con cotizacion de envio
+        Prueba servicio de confirmar compra con cotizacion de envio.
         '''
         self.parametros['numero_recibo'] = "1"
-        compra = self.andreani.confirmar_compra_datos_impresion(**self.parametros)
+        compra = self.andreani.confirmar_compra_datos_impresion(
+            **self.parametros)
         self.assertTrue(compra)
-

@@ -1,7 +1,6 @@
 '''
 Implementa los servicios ofrecidos por el webservice de andreani.
 '''
-import logging
 import string
 
 from . import validator
@@ -12,21 +11,28 @@ from suds.bindings import binding
 # modifico namespace del envoltorio soap
 binding.envns = ('SOAP-ENV', 'http://www.w3.org/2003/05/soap-envelope')
 
+
 class API(object):
-    
+
     '''
     Implementa los servicios ofrecidos por el webservice de andreani.
     '''
 
     DEBUG = False
-    URL = {
+    _url_staging = "https://www.e-andreani.com/CasaStaging/eCommerce/%s?wsdl"
+    _URL = {
         'Staging': {
-            'consultar_sucursales': ('https://www.e-andreani.com/CasaStaging/eCommerce/ConsultaSucursales.svc?wsdl', 'ConsultarSucursales'),
-            'cotizar_envio': ('https://www.e-andreani.com/CasaStaging/eCommerce/CotizacionEnvio.svc?wsdl', 'CotizarEnvio'),
-            'confirmar_compra': ('https://www.e-andreani.com/CasaStaging/eCommerce/ImposicionRemota.svc?wsdl', 'ConfirmarCompra'),
-            'confirmar_compra_datos_impresion': ('https://www.e-andreani.com/CasaStaging/eCommerce/ImposicionRemota.svc?wsdl', 'ConfirmarCompraConRecibo'),
+            'consultar_sucursales': (_url_staging % 'ConsultaSucursales.svc',
+            'ConsultarSucursales'),
+            'cotizar_envio': (_url_staging % 'CotizacionEnvio.svc',
+            'CotizarEnvio'),
+            'confirmar_compra': (_url_staging % 'ImposicionRemota.svc',
+            'ConfirmarCompra'),
+            'confirmar_compra_datos_impresion':
+            (_url_staging % 'ImposicionRemota.svc', 'ConfirmarCompraConRecibo'),
         },
     }
+
     def __init__(self, username, password, cliente, contrato):
         '''
         Inicializa datos del objeto
@@ -49,7 +55,7 @@ class API(object):
             wsdl, metodo = self.__get_wsdl(peticion)
             soap = suds.client.Client(wsdl)
             # configuro content-type de la peticion
-            # XXX: es obligatorio para el servidor que el parametro "action" 
+            # XXX: es obligatorio para el servidor que el parametro "action"
             # este dentro de la cabecera 'Content-Type'
             metodo = getattr(soap.service, metodo)
             action = metodo.method.soap.action
@@ -62,7 +68,7 @@ class API(object):
                 raise CodigoPostalInvalido from e
             raise APIError(text) from e
 
-    def consultar_sucursales(self, 
+    def consultar_sucursales(self,
                              codigo_postal=None,
                              localidad=None,
                              provincia=None):
@@ -95,7 +101,7 @@ class API(object):
         sucursal_retiro -- integer: Código de "Sucursal Andreani" donde el envío
                                    permanecerá en Custodia. Obligatorio para los
                                    Servicios de Retiro en Sucursal
-        cp_destino -- string: Obligatorio para los Servicios de Envío a 
+        cp_destino -- string: Obligatorio para los Servicios de Envío a
                               Domicilio
         peso -- float: Expresado en gramos
         volumen -- float: Expresados en centimetros cúbicos
@@ -112,7 +118,7 @@ class API(object):
         # obtengo resultado
         response = self.__soap("cotizar_envio", cotizacionEnvio=parametros)
         return self.__to_dict(response) if response else None
-        
+
     def confirmar_compra(self, **kwargs):
         '''
         Genera un envío en Andreani.
@@ -123,14 +129,14 @@ class API(object):
 
         params
         -----------------------
-        sucursal_retiro -- Integer: Código de "Sucursal Andreani" donde el 
-                                    envío permanecerá en Custodia. Obligatorio 
-                                    para los Servicios de Retiro en Sucursal 
-                                    (valor "sucursal" de la consulta de 
+        sucursal_retiro -- Integer: Código de "Sucursal Andreani" donde el
+                                    envío permanecerá en Custodia. Obligatorio
+                                    para los Servicios de Retiro en Sucursal
+                                    (valor "sucursal" de la consulta de
                                     sucursales)
         provincia -- String
         localidad -- String
-        codigo_postal -- String: Codigo postal del destino 
+        codigo_postal -- String: Codigo postal del destino
         calle -- String
         numero -- String
         departamento -- String
@@ -148,32 +154,32 @@ class API(object):
         detalle_productos_retiro -- String
         peso -- Float: Expresado en Gramos (gr.)
         volumen -- Float: Expresado en Centímetros Cúbicos (cc3.) (No es
-                          obligatorio si se usan categorías de peso). 
+                          obligatorio si se usan categorías de peso).
                           Considerar el volumen del envoltorio/Embalaje.
         valor_declarado -- Float: Obligatorio para los Servicios que incluye
                                  seguro en caso de siniestro
         valor_cobrar -- Float: Obligatorio para los Servicio que incluyen
                                Gestión Cobranza (pago contrareembolso)
         sucursal_cliente -- String: Nombre que identifica la sucursal/depósito
-                                    del Cliente. Obligatorio para los Servicios 
-                                    de Retiro en Sucursal Andreani más próxima 
+                                    del Cliente. Obligatorio para los Servicios
+                                    de Retiro en Sucursal Andreani más próxima
                                     a la sucursal/depósito de Cliente
         categoria_distancia -- Integer: Código de categoría para la cotización.
-                                        Obligatorio cuando la tarifas del 
-                                        servicio se cotizan por Categorías de 
+                                        Obligatorio cuando la tarifas del
+                                        servicio se cotizan por Categorías de
                                         Distancia
         categoria_facturacion -- Integer: Uso interno
-        categoria_peso -- Integer: Código de categoría para la cotización. 
-                                   Obligatorio cuando la tarifas del servicio 
-                                   se cotizan por Categorías de Peso. (por ej. 
+        categoria_peso -- Integer: Código de categoría para la cotización.
+                                   Obligatorio cuando la tarifas del servicio
+                                   se cotizan por Categorías de Peso. (por ej.
                                    1.- Zapatos, 2.-Indumentaria)
-        tarifa -- Decimal: Valor de cotización del envío. Sólo se setea 
-                           si se consume el servicio web de Cotización. 
-                           Este valor es de referencia, ya que el sistema 
+        tarifa -- Decimal: Valor de cotización del envío. Sólo se setea
+                           si se consume el servicio web de Cotización.
+                           Este valor es de referencia, ya que el sistema
                            recalculará la tarifa junto con el alta.
         '''
         # configuro parametros de la peticion
-        parametros = { 
+        parametros = {
             'SucursalRetiro': kwargs.get('sucursal_retiro'),
             'Provincia': kwargs.get('provincia'),
             'Localidad': kwargs.get('localidad'),
@@ -191,7 +197,7 @@ class API(object):
             'NombreApellidoAlternativo': kwargs.get(
                 'nombre_apellido_alternativo'),
             'NumeroTransaccion': kwargs.get('numero_transaccion'),
-            'DetalleProductosEntrega': kwargs.get('detalle_productos_entrega'), 
+            'DetalleProductosEntrega': kwargs.get('detalle_productos_entrega'),
             'DetalleProductosRetiro': kwargs.get('detalle_productos_retiro'),
             'Peso': kwargs.get('peso'),
             'Volumen': kwargs.get('volumen'),
@@ -202,7 +208,7 @@ class API(object):
             'CategoriaDistancia': kwargs.get('categoria_distancia'),
             'CategoriaFacturacion': kwargs.get('categoria_facturacion'),
             'CategoriaPeso': kwargs.get('categoria_peso'),
-            'Tarifa': kwargs.get('tarifa'), 
+            'Tarifa': kwargs.get('tarifa'),
         }
         # obtengo resultado
         response = self.__soap("confirmar_compra", compra=parametros)
@@ -220,14 +226,14 @@ class API(object):
 
         params
         -----------------------
-        sucursal_retiro -- Integer: Código de "Sucursal Andreani" donde el 
-                                    envío permanecerá en Custodia. Obligatorio 
-                                    para los Servicios de Retiro en Sucursal 
-                                    (valor "sucursal" de la consulta de 
+        sucursal_retiro -- Integer: Código de "Sucursal Andreani" donde el
+                                    envío permanecerá en Custodia. Obligatorio
+                                    para los Servicios de Retiro en Sucursal
+                                    (valor "sucursal" de la consulta de
                                     sucursales)
         provincia -- String
         localidad -- String
-        codigo_postal -- String: Codigo postal del destino 
+        codigo_postal -- String: Codigo postal del destino
         calle -- String
         numero -- String
         departamento -- String
@@ -245,32 +251,32 @@ class API(object):
         detalle_productos_retiro -- String
         peso -- Float: Expresado en Gramos (gr.)
         volumen -- Float: Expresado en Centímetros Cúbicos (cc3.) (No es
-                          obligatorio si se usan categorías de peso). 
+                          obligatorio si se usan categorías de peso).
                           Considerar el volumen del envoltorio/Embalaje.
         valor_declarado -- Float: Obligatorio para los Servicios que incluye
                                  seguro en caso de siniestro
         valor_cobrar -- Float: Obligatorio para los Servicio que incluyen
                                Gestión Cobranza (pago contrareembolso)
         sucursal_cliente -- String: Nombre que identifica la sucursal/depósito
-                                    del Cliente. Obligatorio para los Servicios 
-                                    de Retiro en Sucursal Andreani más próxima 
+                                    del Cliente. Obligatorio para los Servicios
+                                    de Retiro en Sucursal Andreani más próxima
                                     a la sucursal/depósito de Cliente
         categoria_distancia -- Integer: Código de categoría para la cotización.
-                                        Obligatorio cuando la tarifas del 
-                                        servicio se cotizan por Categorías de 
+                                        Obligatorio cuando la tarifas del
+                                        servicio se cotizan por Categorías de
                                         Distancia
         categoria_facturacion -- Integer: Uso interno
-        categoria_peso -- Integer: Código de categoría para la cotización. 
-                                   Obligatorio cuando la tarifas del servicio 
-                                   se cotizan por Categorías de Peso. (por ej. 
+        categoria_peso -- Integer: Código de categoría para la cotización.
+                                   Obligatorio cuando la tarifas del servicio
+                                   se cotizan por Categorías de Peso. (por ej.
                                    1.- Zapatos, 2.-Indumentaria)
-        tarifa -- Decimal: Valor de cotización del envío. Sólo se setea 
-                           si se consume el servicio web de Cotización. 
-                           Este valor es de referencia, ya que el sistema 
+        tarifa -- Decimal: Valor de cotización del envío. Sólo se setea
+                           si se consume el servicio web de Cotización.
+                           Este valor es de referencia, ya que el sistema
                            recalculará la tarifa junto con el alta.
         '''
         # configuro parametros de la peticion
-        parametros = { 
+        parametros = {
             'SucursalRetiro': kwargs.get('sucursal_retiro'),
             'Provincia': kwargs.get('provincia'),
             'Localidad': kwargs.get('localidad'),
@@ -288,7 +294,7 @@ class API(object):
             'NombreApellidoAlternativo': kwargs.get(
                 'nombre_apellido_alternativo'),
             'NumeroTransaccion': kwargs.get('numero_transaccion'),
-            'DetalleProductosEntrega': kwargs.get('detalle_productos_entrega'), 
+            'DetalleProductosEntrega': kwargs.get('detalle_productos_entrega'),
             'DetalleProductosRetiro': kwargs.get('detalle_productos_retiro'),
             'Peso': kwargs.get('peso'),
             'Volumen': kwargs.get('volumen'),
@@ -299,11 +305,11 @@ class API(object):
             'CategoriaDistancia': kwargs.get('categoria_distancia'),
             'CategoriaFacturacion': kwargs.get('categoria_facturacion'),
             'CategoriaPeso': kwargs.get('categoria_peso'),
-            'Tarifa': kwargs.get('tarifa'), 
-            'NumeroRecibo': kwargs.get('numero_recibo'), 
+            'Tarifa': kwargs.get('tarifa'),
+            'NumeroRecibo': kwargs.get('numero_recibo'),
         }
         # obtengo resultado
-        response = self.__soap("confirmar_compra_datos_impresion", 
+        response = self.__soap("confirmar_compra_datos_impresion",
                                compra=parametros)
         return self.__to_dict(response) if response else None
 
@@ -395,16 +401,19 @@ class API(object):
                 result.append("_")
             result.append(char.lower())
         return ''.join(result)
-    
+
     def __get_wsdl(self, peticion):
         '''
-        Obtiene la URL del WSDL y el nombre del metodo para la peticion 
+        Obtiene la URL del WSDL y el nombre del metodo para la peticion
         dada. Tiene en cuenta el ambiente en el que se ejecuta.
         '''
         if self.DEBUG:
-            return self.URL['Staging'][peticion]
+            return self._URL['Staging'][peticion]
+
 
 class CodigoPostalInvalido(ValueError):
     pass
+
+
 class APIError(Exception):
     pass
