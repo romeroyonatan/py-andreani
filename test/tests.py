@@ -76,8 +76,8 @@ class ConsultarSucursalesTests(TestCase):
         Busca sucursales por todos los filtros.
         '''
         sucursales = self.andreani.consultar_sucursales(codigo_postal=1754,
-                                                        provincia="buenos",
-                                                        localidad="san justo")
+                                                      provincia="buenos aires",
+                                                      localidad="san justo")
         self.assertTrue(sucursales)
 
     def test_sin_resultados(self):
