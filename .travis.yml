@@ -8,6 +8,6 @@ install:
   - pip install coverage
   - pip install -r requirements.txt
 script:
-  coverage run --source=andreani manage.py test
+  coverage run --source=andreani setup.py test
 after_success:
   coveralls
