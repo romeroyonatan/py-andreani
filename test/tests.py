@@ -518,20 +518,20 @@ class ConsultarTrazabilidadTests(TestCase):
             return_value=Factory.object(dict={
                 "NumeroEnvio": "103",
                 "Envios": [
-                      Factory.object(dict={
-                            "NombreEnvio": "Constancia de Envío",
-                            "NroAndreani": "*00000000249801",
-                            "FechaAlta": "2015-07-22 10:10:50-03:00",
-                            "Eventos": [
-                                Factory.object(dict={
-                                        "Fecha": "2015-07-22 10:10:50-03:00",
-                                        "IdEstado": 30,
-                                        "Estado": "Envío no ingresado",
-                                        "IdMotivo": -1,
-                                        "Motivo": None,
-                                        "Sucursal": "Sucursal Genérica"})
-                            ],
-                      }),
+                    Factory.object(dict={
+                        "NombreEnvio": "Constancia de Envío",
+                        "NroAndreani": "*00000000249801",
+                        "FechaAlta": "2015-07-22 10:10:50-03:00",
+                        "Eventos": [
+                            Factory.object(dict={
+                                "Fecha": "2015-07-22 10:10:50-03:00",
+                                "IdEstado": 30,
+                                "Estado": "Envío no ingresado",
+                                "IdMotivo": -1,
+                                "Motivo": None,
+                                "Sucursal": "Sucursal Genérica"})
+                        ],
+                    }),
                 ],
             }))
 
