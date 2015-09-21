@@ -3,6 +3,7 @@ import logging
 import andreani
 import suds
 import suds.client
+from suds.sudsobject import Factory
 from unittest import TestCase, mock
 
 # credenciales de prueba
@@ -39,7 +40,7 @@ class ConsultarSucursalesTests(TestCase):
         Busca sucursales sin filtros
         '''
         self.andreani._API__soap = mock.MagicMock(return_value=[[
-            type('testclass', (object,), {
+            Factory.object(dict={
                 "Descripcion": "9 DE JULIO",
                 "Direccion": "Bme. Mitre 1668, 6500, 9 DE JULIO, BUENOS AIRES",
                 "HoradeTrabajo": None,
@@ -57,8 +58,8 @@ class ConsultarSucursalesTests(TestCase):
                 "TipoTelefono1": None,
                 "TipoTelefono2": None,
                 "TipoTelefono3": None
-            })(),
-            type('testclass', (object,), {
+            }),
+            Factory.object(dict={
                 "Descripcion": "TRIBUNALES",
                 "Direccion": "MOLINEDO 1600, 1870 ,AVELLANEDA, BUENOS AIRES",
                 "HoradeTrabajo": "De Lunes a Viernes de 08:30 a 17:30",
@@ -76,8 +77,8 @@ class ConsultarSucursalesTests(TestCase):
                 "TipoTelefono1": None,
                 "TipoTelefono2": None,
                 "TipoTelefono3": None
-            })(),
-            type('testclass', (object,), {
+            }),
+            Factory.object(dict={
                 "Descripcion": "AZUL",
                 "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
                 "HoradeTrabajo": None,
@@ -95,7 +96,7 @@ class ConsultarSucursalesTests(TestCase):
                 "TipoTelefono1": None,
                 "TipoTelefono2": None,
                 "TipoTelefono3": None
-            })(),
+            }),
         ]])
         sucursales = self.andreani.consultar_sucursales()
         self.assertTrue(sucursales)
@@ -105,7 +106,7 @@ class ConsultarSucursalesTests(TestCase):
         Busca sucursales por codigo postal.
         '''
         self.andreani._API__soap = mock.MagicMock(return_value=[[
-            type('testclass', (object,), {
+            Factory.object(dict={
                 "Descripcion": "AZUL",
                 "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
                 "HoradeTrabajo": None,
@@ -123,7 +124,7 @@ class ConsultarSucursalesTests(TestCase):
                 "TipoTelefono1": None,
                 "TipoTelefono2": None,
                 "TipoTelefono3": None
-            })(),
+            }),
         ]])
         sucursales = self.andreani.consultar_sucursales(codigo_postal=7300)
         self.assertTrue(sucursales)
@@ -133,7 +134,7 @@ class ConsultarSucursalesTests(TestCase):
         Busca sucursales por provincia.
         '''
         self.andreani._API__soap = mock.MagicMock(return_value=[[
-            type('testclass', (object,), {
+            Factory.object(dict={
                 "Descripcion": "9 DE JULIO",
                 "Direccion": "Bme. Mitre 1668, 6500, 9 DE JULIO, BUENOS AIRES",
                 "HoradeTrabajo": None,
@@ -151,8 +152,8 @@ class ConsultarSucursalesTests(TestCase):
                 "TipoTelefono1": None,
                 "TipoTelefono2": None,
                 "TipoTelefono3": None
-            })(),
-            type('testclass', (object,), {
+            }),
+            Factory.object(dict={
                 "Descripcion": "TRIBUNALES",
                 "Direccion": "MOLINEDO 1600, 1870 ,AVELLANEDA, BUENOS AIRES",
                 "HoradeTrabajo": "De Lunes a Viernes de 08:30 a 17:30",
@@ -170,8 +171,8 @@ class ConsultarSucursalesTests(TestCase):
                 "TipoTelefono1": None,
                 "TipoTelefono2": None,
                 "TipoTelefono3": None
-            })(),
-            type('testclass', (object,), {
+            }),
+            Factory.object(dict={
                 "Descripcion": "AZUL",
                 "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
                 "HoradeTrabajo": None,
@@ -189,7 +190,7 @@ class ConsultarSucursalesTests(TestCase):
                 "TipoTelefono1": None,
                 "TipoTelefono2": None,
                 "TipoTelefono3": None
-            })(),
+            }),
         ]])
         sucursales = self.andreani.consultar_sucursales(
             provincia="Buenos Aires")
@@ -200,7 +201,7 @@ class ConsultarSucursalesTests(TestCase):
         Busca sucursales por localidad.
         '''
         self.andreani._API__soap = mock.MagicMock(return_value=[[
-            type('testclass', (object,), {
+            Factory.object(dict={
                 "Descripcion": "AZUL",
                 "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
                 "HoradeTrabajo": None,
@@ -218,7 +219,7 @@ class ConsultarSucursalesTests(TestCase):
                 "TipoTelefono1": None,
                 "TipoTelefono2": None,
                 "TipoTelefono3": None
-            })(),
+            }),
         ]])
         sucursales = self.andreani.consultar_sucursales(localidad="azul")
         self.assertTrue(sucursales)
@@ -228,7 +229,7 @@ class ConsultarSucursalesTests(TestCase):
         Busca sucursales por varios filtros a la vez.
         '''
         self.andreani._API__soap = mock.MagicMock(return_value=[[
-            type('testclass', (object,), {
+            Factory.object(dict={
                 "Descripcion": "AZUL",
                 "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
                 "HoradeTrabajo": None,
@@ -246,7 +247,7 @@ class ConsultarSucursalesTests(TestCase):
                 "TipoTelefono1": None,
                 "TipoTelefono2": None,
                 "TipoTelefono3": None
-            })(),
+            }),
         ]])
         sucursales = self.andreani.consultar_sucursales(
             codigo_postal=7300,
@@ -262,7 +263,7 @@ class ConsultarSucursalesTests(TestCase):
         Busca sucursales por todos los filtros.
         '''
         self.andreani._API__soap = mock.MagicMock(return_value=[[
-            type('testclass', (object,), {
+            Factory.object(dict={
                 "Descripcion": "TRIBUNALES",
                 "Direccion": "MOLINEDO 1600, 1870 ,AVELLANEDA, BUENOS AIRES",
                 "HoradeTrabajo": "De Lunes a Viernes de 08:30 a 17:30",
@@ -280,7 +281,7 @@ class ConsultarSucursalesTests(TestCase):
                 "TipoTelefono1": None,
                 "TipoTelefono2": None,
                 "TipoTelefono3": None
-            })(),
+            }),
         ]])
         sucursales = self.andreani.consultar_sucursales(
             codigo_postal=1870,
@@ -328,14 +329,14 @@ class CotizarEnvioTests(TestCase):
         '''
         api = andreani.API(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_ESTANDAR)
         api._API__soap = mock.MagicMock(
-            return_value=type('testclass', (object,), {
+            return_value=Factory.object(dict={
                 "CategoriaDistancia": "INTERIOR 1",
                 "CategoriaDistanciaId": "2",
                 "CategoriaPeso": "1",
                 "CategoriaPesoId": "1",
                 "PesoAforado": 1.0,
                 "Tarifa": 55.9,
-            })())
+            }))
         api.DEBUG = True
         cotizacion = api.cotizar_envio(cp_destino="9410",  # ushuaia
                                        peso="1",
@@ -348,14 +349,14 @@ class CotizarEnvioTests(TestCase):
         Cotizacion envio a sucursal.
         '''
         self.andreani._API__soap = mock.MagicMock(
-            return_value=type('testclass', (object,), {
+            return_value=Factory.object(dict={
                 "CategoriaDistancia": "INTERIOR 1",
                 "CategoriaDistanciaId": "2",
                 "CategoriaPeso": "1",
                 "CategoriaPesoId": "1",
                 "PesoAforado": 1.0,
                 "Tarifa": 55.9,
-            })())
+            }))
         cotizacion = self.andreani.cotizar_envio(sucursal_retiro="20",
                                                  cp_destino="1754",
                                                  peso="1000",
@@ -479,10 +480,10 @@ class ConfirmarCompraTests(TestCase):
         Prueba servicio de confirmar compra con cotizacion de envio
         '''
         self.andreani._API__soap = mock.MagicMock(
-            return_value=type('testclass', (object,), {
+            return_value=Factory.object(dict={
                 "NumeroAndreani": "*00000000252903",
                 "Recibo": None
-            })())
+            }))
         compra = self.andreani.confirmar_compra(**self.parametros)
         self.assertTrue(compra)
 
@@ -491,11 +492,49 @@ class ConfirmarCompraTests(TestCase):
         Prueba servicio de confirmar compra con cotizacion de envio.
         '''
         self.andreani._API__soap = mock.MagicMock(
-            return_value=type('testclass', (object,), {
+            return_value=Factory.object(dict={
                 "NumeroAndreani": "*00000000252903",
                 "Recibo": "RETA01PSD00000001"
-            })())
+            }))
         self.parametros['numero_recibo'] = "1"
         compra = self.andreani.confirmar_compra_datos_impresion(
             **self.parametros)
         self.assertTrue(compra)
+
+
+class ConsultarTrazabilidadTests(TestCase):
+    def setUp(self):
+        self.andreani = andreani.API(TEST_USER,
+                                     TEST_PASSWD,
+                                     CLIENTE,
+                                     CONTRATO_SUCURSAL)
+        self.andreani.DEBUG = True
+
+    def test_consultar_trazabilidad(self):
+        '''
+        Consulta la trazabilidad de un paquete no enviado.
+        '''
+        self.andreani._API__soap = mock.MagicMock(
+            return_value=Factory.object(dict={
+                "NumeroEnvio": "103",
+                "Envios": [
+                      Factory.object(dict={
+                            "NombreEnvio": "Constancia de Envío",
+                            "NroAndreani": "*00000000249801",
+                            "FechaAlta": "2015-07-22 10:10:50-03:00",
+                            "Eventos": [
+                                Factory.object(dict={
+                                        "Fecha": "2015-07-22 10:10:50-03:00",
+                                        "IdEstado": 30,
+                                        "Estado": "Envío no ingresado",
+                                        "IdMotivo": -1,
+                                        "Motivo": None,
+                                        "Sucursal": "Sucursal Genérica"})
+                            ],
+                      }),
+                ],
+            }))
+
+        trazabilidad = self.andreani.consultar_trazabilidad(
+            numero_pieza="*00000000249801")
+        self.assertTrue(trazabilidad)

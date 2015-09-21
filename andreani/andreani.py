@@ -8,6 +8,7 @@ from . import validator
 import suds.client
 import suds.wsse
 from suds.bindings import binding
+from suds.sudsobject import asdict
 # modifico namespace del envoltorio soap
 binding.envns = ('SOAP-ENV', 'http://www.w3.org/2003/05/soap-envelope')
 
@@ -31,6 +32,11 @@ class API(object):
             'confirmar_compra_datos_impresion':
                 (_url_staging % 'ImposicionRemota.svc',
                  'ConfirmarCompraConRecibo'),
+            'consultar_trazabilidad': (
+                ('https://www.e-andreani.com/eAndreaniWSStaging/' +
+                 'Service.svc?wsdl'),
+                'ObtenerTrazabilidadSinClienteCodificado'
+            )
         },
     }
 
@@ -320,20 +326,30 @@ class API(object):
         '''
         Permite consultar Códigos Postales, Localidades, Provincias y Países.
         '''
-        pass
+        raise NotImplementedError()
 
-    def consulta_trazabilidad(self):
+    def consultar_trazabilidad(self, numero_pieza):
         '''
         Permite consultar la trazabilidad de un envío.
+
+        args
+        --------------
+        NroPieza -- string: Número generado por Andreani que identifica un
+                            envío, o el ID que el cliente asocia a cada uno de
+                            los envíos provistos por él para su distribución.
         '''
-        pass
+        # obtengo resultado
+        response = self.__soap("consultar_trazabilidad", NroPieza={
+            'NroPieza': numero_pieza
+        })
+        return self.__to_dict(response) if response else None
 
     def consulta_ultimo_estado_distribucion(self):
         '''
         Devuelve el último estado de la Distribución de un envío, o
         una lista de envíos.
         '''
-        pass
+        raise NotImplementedError()
 
     def imprimir_constancias(self):
         '''
@@ -341,20 +357,20 @@ class API(object):
         la constancia de entrega de un envío determinado.
         Sólo aplica a envíos que están pendientes de impresión.
         '''
-        pass
+        raise NotImplementedError()
 
     def anular_envio(self):
         '''
         Anula envíos que todavía no hayan ingresado al circuito operativo
         '''
-        pass
+        raise NotImplementedError()
 
     def consultar_datos_impresion(self):
         '''
         Este servicio permite consultar los datos de impresión de una pieza
         dada.
         '''
-        pass
+        raise NotImplementedError()
 
     def reporte_envios_pendientes_impresion(self):
         '''
@@ -364,14 +380,14 @@ class API(object):
         Sirve para permitir su impresión mediante el servicio de "Imprimir
         constancias".
         '''
-        pass
+        raise NotImplementedError()
 
     def reporte_envios_pendientes_ingreso(self):
         '''
         Devuelve un listado de envíos que ya se imprimieron pero
         que todavía no entraron en el circuito operativo de Andreani.
         '''
-        pass
+        raise NotImplementedError()
 
     def generar_remito_imposicion(self):
         '''
@@ -379,20 +395,27 @@ class API(object):
         entrega de mercadería en sucursal por parte del vendedor
         como de el retiro en depósito realizado por Andreani.
         '''
-        pass
+        raise NotImplementedError()
 
     def __to_dict(self, obj):
         '''
         Convierte un objeto en diccionario.
         '''
-        _dict = {}
-        # itero sobre los atributos del objeto
-        for attr in dir(obj):
-            # si no es un atributo de python y no es una funcion
-            if not attr.startswith('__') and not callable(getattr(obj, attr)):
-                # agrego el atributo al diccionario
-                _dict[self.__pythonize(attr)] = getattr(obj, attr)
-        return _dict
+        out = {}
+        for k, v in asdict(obj).items():
+            k = self.__pythonize(k)
+            if hasattr(v, '__keylist__'):
+                out[k] = self.__to_dict(v)
+            elif isinstance(v, list):
+                out[k] = []
+                for item in v:
+                    if hasattr(item, '__keylist__'):
+                        out[k].append(self.__to_dict(item))
+                    else:
+                        out[k].append(item)
+            else:
+                out[k] = v
+        return out
 
     def __pythonize(self, attr):
         '''
