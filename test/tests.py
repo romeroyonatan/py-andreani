@@ -383,6 +383,26 @@ class CotizarEnvioTests(TestCase):
                                         peso="1000",
                                         volumen="1000")
 
+    @mock.patch.object(suds.client.Client, '__new__')
+    def test_api_error(self, fake_client):
+        '''
+        Prueba como reacciona modulo ante una excepcion en el webservice
+        '''
+        # creo un cliente suds falso
+        client = suds.client.Client('fake_url')
+        # el cliente falso retornará codigo postal invalido
+        client.service.CotizarEnvio.side_effect = suds.WebFault(
+            type("testclass", (object,), {
+                "Reason": type("testclass", (object,), {
+                               "Text": "Error 500"}),
+            }), None)
+        fake_client.return_value = client
+        # pruebo que lanze excepcion
+        with self.assertRaises(andreani.APIError):
+            self.andreani.cotizar_envio(cp_destino="1",
+                                        peso="1000",
+                                        volumen="1000")
+
     def test_volumen_menor_cero(self):
         '''
         Cotizacion de un paquete de volumen menor o igual a cero
