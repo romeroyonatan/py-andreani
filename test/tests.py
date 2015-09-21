@@ -1,6 +1,8 @@
 import logging
 
 import andreani
+import suds
+import suds.client
 from unittest import TestCase, mock
 
 # credenciales de prueba
@@ -361,12 +363,21 @@ class CotizarEnvioTests(TestCase):
         self.assertTrue(cotizacion)
         self.assertTrue(cotizacion['tarifa'])
 
-    def test_codigo_postal_invalido(self):
+    @mock.patch.object(suds.client.Client, '__new__')
+    def test_codigo_postal_invalido(self, fake_client):
         '''
         Cotizacion con un codigo postal inexistente.
         '''
-        self.andreani._API__soap = mock.MagicMock(
-            side_effect=andreani.CodigoPostalInvalido())
+        # creo un cliente suds falso
+        client = suds.client.Client('fake_url')
+        # el cliente falso retornará codigo postal invalido
+        client.service.CotizarEnvio.side_effect = suds.WebFault(
+            type("testclass", (object,), {
+                "Reason": type("testclass", (object,), {
+                               "Text": "Codigo postal es invalido"}),
+            }), None)
+        fake_client.return_value = client
+        # pruebo que lanze excepcion
         with self.assertRaises(andreani.CodigoPostalInvalido):
             self.andreani.cotizar_envio(cp_destino="1",
                                         peso="1000",
