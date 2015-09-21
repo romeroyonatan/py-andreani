@@ -3,6 +3,7 @@
 #Comprobaciones:
 #   pyflakes
 #   PEP8
+#   coverage
 
 
 #pyflakes

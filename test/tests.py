@@ -1,7 +1,7 @@
 import logging
 
 import andreani
-from unittest import TestCase
+from unittest import TestCase, mock
 
 # credenciales de prueba
 TEST_USER = "eCommerce_Integra"
@@ -36,6 +36,65 @@ class ConsultarSucursalesTests(TestCase):
         '''
         Busca sucursales sin filtros
         '''
+        self.andreani._API__soap = mock.MagicMock(return_value=[[
+            type('testclass', (object,), {
+                "Descripcion": "9 DE JULIO",
+                "Direccion": "Bme. Mitre 1668, 6500, 9 DE JULIO, BUENOS AIRES",
+                "HoradeTrabajo": None,
+                "Latitud": None,
+                "Longitud": None,
+                "Mail": None,
+                "Numero": "NDJ",
+                "Responsable": None,
+                "Resumen": "9 DE JULIO",
+                "Sucursal": 71,
+                "Telefono1": "0810-122-1111",
+                "Telefono2": "0800-122-1112",
+                "Telefono3": None,
+                "TipoSucursal": 2,
+                "TipoTelefono1": None,
+                "TipoTelefono2": None,
+                "TipoTelefono3": None
+            })(),
+            type('testclass', (object,), {
+                "Descripcion": "TRIBUNALES",
+                "Direccion": "MOLINEDO 1600, 1870 ,AVELLANEDA, BUENOS AIRES",
+                "HoradeTrabajo": "De Lunes a Viernes de 08:30 a 17:30",
+                "Latitud": None,
+                "Longitud": None,
+                "Mail": None,
+                "Numero": "TRI",
+                "Responsable": None,
+                "Resumen": "TRIBUNALES",
+                "Sucursal": 129,
+                "Telefono1": "0810-122-1111",
+                "Telefono2": "0800-122-1112",
+                "Telefono3": None,
+                "TipoSucursal": 3,
+                "TipoTelefono1": None,
+                "TipoTelefono2": None,
+                "TipoTelefono3": None
+            })(),
+            type('testclass', (object,), {
+                "Descripcion": "AZUL",
+                "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
+                "HoradeTrabajo": None,
+                "Latitud": None,
+                "Longitud": None,
+                "Mail": None,
+                "Numero": "AZU",
+                "Responsable": None,
+                "Resumen": "AZUL",
+                "Sucursal": 34,
+                "Telefono1": "0810-122-1111",
+                "Telefono2": "0800-122-1112",
+                "Telefono3": None,
+                "TipoSucursal": 2,
+                "TipoTelefono1": None,
+                "TipoTelefono2": None,
+                "TipoTelefono3": None
+            })(),
+        ]])
         sucursales = self.andreani.consultar_sucursales()
         self.assertTrue(sucursales)
 
@@ -43,41 +102,188 @@ class ConsultarSucursalesTests(TestCase):
         '''
         Busca sucursales por codigo postal.
         '''
-        sucursales = self.andreani.consultar_sucursales(codigo_postal=1048)
+        self.andreani._API__soap = mock.MagicMock(return_value=[[
+            type('testclass', (object,), {
+                "Descripcion": "AZUL",
+                "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
+                "HoradeTrabajo": None,
+                "Latitud": None,
+                "Longitud": None,
+                "Mail": None,
+                "Numero": "AZU",
+                "Responsable": None,
+                "Resumen": "AZUL",
+                "Sucursal": 34,
+                "Telefono1": "0810-122-1111",
+                "Telefono2": "0800-122-1112",
+                "Telefono3": None,
+                "TipoSucursal": 2,
+                "TipoTelefono1": None,
+                "TipoTelefono2": None,
+                "TipoTelefono3": None
+            })(),
+        ]])
+        sucursales = self.andreani.consultar_sucursales(codigo_postal=7300)
         self.assertTrue(sucursales)
 
     def test_filtro_provincia(self):
         '''
         Busca sucursales por provincia.
         '''
-        sucursales = self.andreani.consultar_sucursales(provincia="santa fe")
+        self.andreani._API__soap = mock.MagicMock(return_value=[[
+            type('testclass', (object,), {
+                "Descripcion": "9 DE JULIO",
+                "Direccion": "Bme. Mitre 1668, 6500, 9 DE JULIO, BUENOS AIRES",
+                "HoradeTrabajo": None,
+                "Latitud": None,
+                "Longitud": None,
+                "Mail": None,
+                "Numero": "NDJ",
+                "Responsable": None,
+                "Resumen": "9 DE JULIO",
+                "Sucursal": 71,
+                "Telefono1": "0810-122-1111",
+                "Telefono2": "0800-122-1112",
+                "Telefono3": None,
+                "TipoSucursal": 2,
+                "TipoTelefono1": None,
+                "TipoTelefono2": None,
+                "TipoTelefono3": None
+            })(),
+            type('testclass', (object,), {
+                "Descripcion": "TRIBUNALES",
+                "Direccion": "MOLINEDO 1600, 1870 ,AVELLANEDA, BUENOS AIRES",
+                "HoradeTrabajo": "De Lunes a Viernes de 08:30 a 17:30",
+                "Latitud": None,
+                "Longitud": None,
+                "Mail": None,
+                "Numero": "TRI",
+                "Responsable": None,
+                "Resumen": "TRIBUNALES",
+                "Sucursal": 129,
+                "Telefono1": "0810-122-1111",
+                "Telefono2": "0800-122-1112",
+                "Telefono3": None,
+                "TipoSucursal": 3,
+                "TipoTelefono1": None,
+                "TipoTelefono2": None,
+                "TipoTelefono3": None
+            })(),
+            type('testclass', (object,), {
+                "Descripcion": "AZUL",
+                "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
+                "HoradeTrabajo": None,
+                "Latitud": None,
+                "Longitud": None,
+                "Mail": None,
+                "Numero": "AZU",
+                "Responsable": None,
+                "Resumen": "AZUL",
+                "Sucursal": 34,
+                "Telefono1": "0810-122-1111",
+                "Telefono2": "0800-122-1112",
+                "Telefono3": None,
+                "TipoSucursal": 2,
+                "TipoTelefono1": None,
+                "TipoTelefono2": None,
+                "TipoTelefono3": None
+            })(),
+        ]])
+        sucursales = self.andreani.consultar_sucursales(
+            provincia="Buenos Aires")
         self.assertTrue(sucursales)
 
     def test_filtro_localidad(self):
         '''
         Busca sucursales por localidad.
         '''
-        sucursales = self.andreani.consultar_sucursales(localidad="rosario")
+        self.andreani._API__soap = mock.MagicMock(return_value=[[
+            type('testclass', (object,), {
+                "Descripcion": "AZUL",
+                "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
+                "HoradeTrabajo": None,
+                "Latitud": None,
+                "Longitud": None,
+                "Mail": None,
+                "Numero": "AZU",
+                "Responsable": None,
+                "Resumen": "AZUL",
+                "Sucursal": 34,
+                "Telefono1": "0810-122-1111",
+                "Telefono2": "0800-122-1112",
+                "Telefono3": None,
+                "TipoSucursal": 2,
+                "TipoTelefono1": None,
+                "TipoTelefono2": None,
+                "TipoTelefono3": None
+            })(),
+        ]])
+        sucursales = self.andreani.consultar_sucursales(localidad="azul")
         self.assertTrue(sucursales)
 
     def test_filtros_combinados(self):
         '''
         Busca sucursales por varios filtros a la vez.
         '''
-        sucursales = self.andreani.consultar_sucursales(codigo_postal=1048,
-                                                  localidad="c.a.b.a.")
+        self.andreani._API__soap = mock.MagicMock(return_value=[[
+            type('testclass', (object,), {
+                "Descripcion": "AZUL",
+                "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
+                "HoradeTrabajo": None,
+                "Latitud": None,
+                "Longitud": None,
+                "Mail": None,
+                "Numero": "AZU",
+                "Responsable": None,
+                "Resumen": "AZUL",
+                "Sucursal": 34,
+                "Telefono1": "0810-122-1111",
+                "Telefono2": "0800-122-1112",
+                "Telefono3": None,
+                "TipoSucursal": 2,
+                "TipoTelefono1": None,
+                "TipoTelefono2": None,
+                "TipoTelefono3": None
+            })(),
+        ]])
+        sucursales = self.andreani.consultar_sucursales(
+            codigo_postal=7300,
+            localidad="azul")
         self.assertTrue(sucursales)
-        sucursales = self.andreani.consultar_sucursales(provincia="santa fe",
-                                                  localidad="venado tuerto")
+        sucursales = self.andreani.consultar_sucursales(
+            provincia="Buenos Aires",
+            localidad="Azul")
         self.assertTrue(sucursales)
 
     def test_todos_los_filtros(self):
         '''
         Busca sucursales por todos los filtros.
         '''
-        sucursales = self.andreani.consultar_sucursales(codigo_postal=1754,
-                                                      provincia="buenos aires",
-                                                      localidad="san justo")
+        self.andreani._API__soap = mock.MagicMock(return_value=[[
+            type('testclass', (object,), {
+                "Descripcion": "TRIBUNALES",
+                "Direccion": "MOLINEDO 1600, 1870 ,AVELLANEDA, BUENOS AIRES",
+                "HoradeTrabajo": "De Lunes a Viernes de 08:30 a 17:30",
+                "Latitud": None,
+                "Longitud": None,
+                "Mail": None,
+                "Numero": "TRI",
+                "Responsable": None,
+                "Resumen": "TRIBUNALES",
+                "Sucursal": 129,
+                "Telefono1": "0810-122-1111",
+                "Telefono2": "0800-122-1112",
+                "Telefono3": None,
+                "TipoSucursal": 3,
+                "TipoTelefono1": None,
+                "TipoTelefono2": None,
+                "TipoTelefono3": None
+            })(),
+        ]])
+        sucursales = self.andreani.consultar_sucursales(
+            codigo_postal=1870,
+            provincia="buenos aires",
+            localidad="avellaneda")
         self.assertTrue(sucursales)
 
     def test_sin_resultados(self):
@@ -86,14 +292,17 @@ class ConsultarSucursalesTests(TestCase):
         lista vacia.
         '''
         # sin resultados
-        sucursales = self.andreani.consultar_sucursales(provincia="cordoba",
-                                                  localidad="san justo")
+        self.andreani._API__soap = mock.MagicMock(return_value=[[]])
+        sucursales = self.andreani.consultar_sucursales(
+            provincia="cordoba",
+            localidad="san justo")
         self.assertFalse(sucursales)
 
     def test_codigo_postal_invalido(self):
         '''
         Busca sucursales por un codigo postal inexistente
         '''
+        self.andreani._API__soap = mock.MagicMock(return_value=[[]])
         # codigo postal invalido
         sucursales = self.andreani.consultar_sucursales(codigo_postal="1")
         self.assertFalse(sucursales)
@@ -116,6 +325,15 @@ class CotizarEnvioTests(TestCase):
         Cotizacion envio a domicilio.
         '''
         api = andreani.API(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_ESTANDAR)
+        api._API__soap = mock.MagicMock(
+            return_value=type('testclass', (object,), {
+                "CategoriaDistancia": "INTERIOR 1",
+                "CategoriaDistanciaId": "2",
+                "CategoriaPeso": "1",
+                "CategoriaPesoId": "1",
+                "PesoAforado": 1.0,
+                "Tarifa": 55.9,
+            })())
         api.DEBUG = True
         cotizacion = api.cotizar_envio(cp_destino="9410",  # ushuaia
                                        peso="1",
@@ -127,8 +345,17 @@ class CotizarEnvioTests(TestCase):
         '''
         Cotizacion envio a sucursal.
         '''
+        self.andreani._API__soap = mock.MagicMock(
+            return_value=type('testclass', (object,), {
+                "CategoriaDistancia": "INTERIOR 1",
+                "CategoriaDistanciaId": "2",
+                "CategoriaPeso": "1",
+                "CategoriaPesoId": "1",
+                "PesoAforado": 1.0,
+                "Tarifa": 55.9,
+            })())
         cotizacion = self.andreani.cotizar_envio(sucursal_retiro="20",
-                                                 cp_destino="1754",  # san justo
+                                                 cp_destino="1754",
                                                  peso="1000",
                                                  volumen="1000")
         self.assertTrue(cotizacion)
@@ -138,6 +365,8 @@ class CotizarEnvioTests(TestCase):
         '''
         Cotizacion con un codigo postal inexistente.
         '''
+        self.andreani._API__soap = mock.MagicMock(
+            side_effect=andreani.CodigoPostalInvalido())
         with self.assertRaises(andreani.CodigoPostalInvalido):
             self.andreani.cotizar_envio(cp_destino="1",
                                         peso="1000",
@@ -218,6 +447,11 @@ class ConfirmarCompraTests(TestCase):
         '''
         Prueba servicio de confirmar compra con cotizacion de envio
         '''
+        self.andreani._API__soap = mock.MagicMock(
+            return_value=type('testclass', (object,), {
+                "NumeroAndreani": "*00000000252903",
+                "Recibo": None
+            })())
         compra = self.andreani.confirmar_compra(**self.parametros)
         self.assertTrue(compra)
 
@@ -225,6 +459,11 @@ class ConfirmarCompraTests(TestCase):
         '''
         Prueba servicio de confirmar compra con cotizacion de envio.
         '''
+        self.andreani._API__soap = mock.MagicMock(
+            return_value=type('testclass', (object,), {
+                "NumeroAndreani": "*00000000252903",
+                "Recibo": "RETA01PSD00000001"
+            })())
         self.parametros['numero_recibo'] = "1"
         compra = self.andreani.confirmar_compra_datos_impresion(
             **self.parametros)

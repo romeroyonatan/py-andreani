@@ -23,13 +23,14 @@ class API(object):
     _URL = {
         'Staging': {
             'consultar_sucursales': (_url_staging % 'ConsultaSucursales.svc',
-            'ConsultarSucursales'),
+                                     'ConsultarSucursales'),
             'cotizar_envio': (_url_staging % 'CotizacionEnvio.svc',
-            'CotizarEnvio'),
+                              'CotizarEnvio'),
             'confirmar_compra': (_url_staging % 'ImposicionRemota.svc',
-            'ConfirmarCompra'),
+                                 'ConfirmarCompra'),
             'confirmar_compra_datos_impresion':
-            (_url_staging % 'ImposicionRemota.svc', 'ConfirmarCompraConRecibo'),
+                (_url_staging % 'ImposicionRemota.svc',
+                 'ConfirmarCompraConRecibo'),
         },
     }
 
@@ -60,8 +61,9 @@ class API(object):
             metodo = getattr(soap.service, metodo)
             soap.set_options(wsse=self.security,
                              headers={'Content-Type':
-            'application/soap+xml;charset=utf-8;action=%s' %
-            metodo.method.soap.action})
+                                      'application/soap+xml;charset=utf-8;' +
+                                      'action=%s' %
+                                      metodo.method.soap.action})
             return metodo(**kwargs)
         except suds.WebFault as e:
             text = e.fault.Reason.Text
@@ -99,9 +101,9 @@ class API(object):
 
         args
         --------
-        sucursal_retiro -- integer: Código de "Sucursal Andreani" donde el envío
-                                   permanecerá en Custodia. Obligatorio para los
-                                   Servicios de Retiro en Sucursal
+        sucursal_retiro -- integer: Código de "Sucursal Andreani" donde el
+                                    envío permanecerá en Custodia. Obligatorio
+                                    para los Servicios de Retiro en Sucursal
         cp_destino -- string: Obligatorio para los Servicios de Envío a
                               Domicilio
         peso -- float: Expresado en gramos
@@ -220,8 +222,8 @@ class API(object):
         Genera un envío y devuelve todos los datos necesarios para
         que el cliente imprima la etiqueta del bulto.
 
-        A diferencia del Confirmar compra el pedido finaliza el proceso de Alta,
-        El uso de este Web Services es recomendado para cliente que
+        A diferencia del Confirmar compra el pedido finaliza el proceso de
+        Alta, El uso de este Web Services es recomendado para cliente que
         tienen altas intensivas y un proceso de preparación que
         necesita agilidad
 

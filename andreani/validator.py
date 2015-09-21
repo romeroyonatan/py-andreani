@@ -28,7 +28,7 @@ class gt(object):
             # valido que cumpla el requisito mayor que
             if float(kwargs.get(self.attr_name)) <= self.value:
                 raise ValueError(_("%s debe ser mayor a %d" %
-                                  (self.attr_name, self.value)))
+                                   (self.attr_name, self.value)))
             # retorno el llamado de la funcion
             return f(*args, **kwargs)
         return wrapped_f
