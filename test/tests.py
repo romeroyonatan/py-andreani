@@ -4,6 +4,7 @@ import andreani
 import suds
 import suds.client
 from suds.sudsobject import Factory
+import unittest
 from unittest import TestCase, mock
 
 # credenciales de prueba
@@ -503,6 +504,9 @@ class ConfirmarCompraTests(TestCase):
 
 
 class ConsultarTrazabilidadTests(TestCase):
+    '''
+    Set de pruebas de consulta de trazabilidad de un envio.
+    '''
     def setUp(self):
         self.andreani = andreani.API(TEST_USER,
                                      TEST_PASSWD,
@@ -538,3 +542,20 @@ class ConsultarTrazabilidadTests(TestCase):
         trazabilidad = self.andreani.consultar_trazabilidad(
             numero_pieza="*00000000249801")
         self.assertTrue(trazabilidad)
+
+
+class CodigoPostalTests(TestCase):
+    '''
+    Set de pruebas de consulta de codigo postal
+    '''
+    def setUp(self):
+        self.andreani = andreani.API(TEST_USER,
+                                     TEST_PASSWD,
+                                     CLIENTE,
+                                     CONTRATO_SUCURSAL)
+        self.andreani.DEBUG = True
+
+    @unittest.expectedFailure
+    def test_cp(self):
+        cp = self.andreani.consultar_codigo_postal(1001)
+        self.assertTrue(cp)

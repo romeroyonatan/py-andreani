@@ -36,7 +36,15 @@ class API(object):
                 ('https://www.e-andreani.com/eAndreaniWSStaging/' +
                  'Service.svc?wsdl'),
                 'ObtenerTrazabilidadSinClienteCodificado'
-            )
+            ),
+            'consultar_codigo_postal': (
+                ('https://bpmwmbsrv.andreani.com:41443/' +
+                 'ConsultasCodigosPostales?wsdl'),
+                'ConsultarCodigoPostal'
+            ),
+            'envios_pendiente_impresion':
+                (_url_staging % 'ImposicionRemota.svc',
+                 'ReporteDeEnviosPendientesImpresion'),
         },
     }
 
@@ -128,6 +136,8 @@ class API(object):
         response = self.__soap("cotizar_envio", cotizacionEnvio=parametros)
         return self.__to_dict(response) if response else None
 
+    @validator.gt("peso", 0)
+    @validator.gt("volumen", 0)
     def confirmar_compra(self, **kwargs):
         '''
         Genera un envío en Andreani.
@@ -223,6 +233,8 @@ class API(object):
         response = self.__soap("confirmar_compra", compra=parametros)
         return self.__to_dict(response) if response else None
 
+    @validator.gt("peso", 0)
+    @validator.gt("volumen", 0)
     def confirmar_compra_datos_impresion(self, **kwargs):
         '''
         Genera un envío y devuelve todos los datos necesarios para
@@ -322,10 +334,15 @@ class API(object):
                                compra=parametros)
         return self.__to_dict(response) if response else None
 
-    def consultas_codigo_postal(self):
+    def consultar_codigo_postal(self, codigo_postal, codigo_pais="ARG"):
         '''
         Permite consultar Códigos Postales, Localidades, Provincias y Países.
         '''
+        # obtengo resultado
+        # response = self.__soap("consultar_codigo_postal",
+        #                        CodigoDePais=codigo_pais,
+        #                        CodigoPostal=codigo_postal)
+        # return self.__to_dict(response) if response else None
         raise NotImplementedError()
 
     def consultar_trazabilidad(self, numero_pieza):
