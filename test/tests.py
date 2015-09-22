@@ -577,6 +577,7 @@ class PendientesImpresionTests(TestCase):
         Pruebo que obtenga los envios pendientes de impresion del cliente de
         pruebas.
         '''
+        # configuro lo que devolvera el mock
         self.andreani._API__soap = mock.MagicMock(
             return_value=Factory.object(
                 dict={"ResultadoReporteEnviosPendientesImpresion[]": [
@@ -613,5 +614,7 @@ class PendientesImpresionTests(TestCase):
                         Piso=None,
                         Provincia="BUENOS AIRES",
                     ))]}))
+        # consulto envios pendientes de impresion
         reporte = self.andreani.reporte_envios_pendientes_impresion()
         self.assertTrue(reporte)
+        self.assertEqual(reporte[0]["calle"], "Florencio Varela")

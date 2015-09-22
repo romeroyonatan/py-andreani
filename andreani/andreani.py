@@ -397,11 +397,16 @@ class API(object):
         Sirve para permitir su impresión mediante el servicio de "Imprimir
         constancias".
         '''
+        key = "resultado_reporte_envios_pendientes_impresion"
         # armo parametros de la peticion y devuelvo resultado
         parametros = {"idCliente": self.cliente}
         response = self.__soap("reporte_envios_pendientes_impresion",
                                ventas=parametros)
-        return self.__to_dict(response) if response else None
+        if response:
+            _dict = self.__to_dict(response)
+            return _dict[key] if _dict else None
+        else:
+            return None
 
     def reporte_envios_pendientes_ingreso(self):
         '''
@@ -444,9 +449,10 @@ class API(object):
         '''
         result = [attr[0].lower()]
         for char in attr[1:]:
-            if char in string.ascii_uppercase:
-                result.append("_")
-            result.append(char.lower())
+            if char in string.ascii_letters:
+                if char in string.ascii_uppercase:
+                    result.append("_")
+                result.append(char.lower())
         return ''.join(result)
 
     def __get_wsdl(self, peticion):
