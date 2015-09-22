@@ -42,7 +42,7 @@ class API(object):
                  'ConsultasCodigosPostales?wsdl'),
                 'ConsultarCodigoPostal'
             ),
-            'envios_pendiente_impresion':
+            'reporte_envios_pendientes_impresion':
                 (_url_staging % 'ImposicionRemota.svc',
                  'ReporteDeEnviosPendientesImpresion'),
         },
@@ -397,7 +397,11 @@ class API(object):
         Sirve para permitir su impresión mediante el servicio de "Imprimir
         constancias".
         '''
-        raise NotImplementedError()
+        # armo parametros de la peticion y devuelvo resultado
+        parametros = {"idCliente": self.cliente}
+        response = self.__soap("reporte_envios_pendientes_impresion",
+                               ventas=parametros)
+        return self.__to_dict(response) if response else None
 
     def reporte_envios_pendientes_ingreso(self):
         '''

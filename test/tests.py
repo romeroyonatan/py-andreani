@@ -559,3 +559,59 @@ class CodigoPostalTests(TestCase):
     def test_cp(self):
         cp = self.andreani.consultar_codigo_postal(1001)
         self.assertTrue(cp)
+
+
+class PendientesImpresionTests(TestCase):
+    '''
+    Set de pruebas de consulta de reportes de envios pendientes de impresion
+    '''
+    def setUp(self):
+        self.andreani = andreani.API(TEST_USER,
+                                     TEST_PASSWD,
+                                     CLIENTE,
+                                     CONTRATO_SUCURSAL)
+        self.andreani.DEBUG = True
+
+    def test_reporte(self):
+        '''
+        Pruebo que obtenga los envios pendientes de impresion del cliente de
+        pruebas.
+        '''
+        self.andreani._API__soap = mock.MagicMock(
+            return_value=Factory.object(
+                dict={"ResultadoReporteEnviosPendientesImpresion[]": [
+                    Factory.object(dict=dict(
+                        Calle="Florencio Varela",
+                        Departamento=None,
+                        DetalleProductosaEntregar="Prueba de entrega",
+                        Localidad="11 DE SEPTIEMBRE",
+                        NombreyApellido="Susana Horia",
+                        Numero="1903",
+                        NumeroAndreani="*00000010310340",
+                        Piso=None,
+                        Provincia="BUENOS AIRES",
+                    )),
+                    Factory.object(dict=dict(
+                        Calle="Florencio Varela",
+                        Departamento=None,
+                        DetalleProductosaEntregar="Prueba de entrega",
+                        Localidad="11 DE SEPTIEMBRE",
+                        NombreyApellido="Susana Horia",
+                        Numero="1903",
+                        NumeroAndreani="*00000010310350",
+                        Piso=None,
+                        Provincia="BUENOS AIRES",
+                    )),
+                    Factory.object(dict=dict(
+                        Calle="Florencio Varela",
+                        Departamento=None,
+                        DetalleProductosaEntregar="Prueba de entrega",
+                        Localidad="11 DE SEPTIEMBRE",
+                        NombreyApellido="Susana Horia",
+                        Numero="1903",
+                        NumeroAndreani="*00000010310370",
+                        Piso=None,
+                        Provincia="BUENOS AIRES",
+                    ))]}))
+        reporte = self.andreani.reporte_envios_pendientes_impresion()
+        self.assertTrue(reporte)
