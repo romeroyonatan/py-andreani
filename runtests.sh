@@ -8,7 +8,7 @@
 
 #pyflakes
 echo "## Pyflakes:"
-find . -name '*.py' | egrep -v '^./static/' | egrep -v '^./lib/' | egrep -v '^./\w*/migrations/' | egrep -v './ratticweb/(local_)?settings.py' | egrep -v '.ropeproject/' | xargs pyflakes
+find . -name '*.py' | egrep -v '^./static/' | egrep -v '^./lib/' | egrep -v '^./\w*/migrations/' | egrep -v './ratticweb/(local_)?settings.py' | egrep -v '.ropeproject/' | egrep -v '*__init__.py' | xargs pyflakes
 
 echo "##"
 
