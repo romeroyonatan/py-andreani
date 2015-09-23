@@ -21,6 +21,7 @@ class API(object):
 
     DEBUG = False
     _url_staging = "https://www.e-andreani.com/CasaStaging/eCommerce/%s?wsdl"
+    # ambiente, nombre, wsdl, metodo
     _URL = {
         'Staging': {
             'consultar_sucursales': (_url_staging % 'ConsultaSucursales.svc',
@@ -45,6 +46,9 @@ class API(object):
             'reporte_envios_pendientes_impresion':
                 (_url_staging % 'ImposicionRemota.svc',
                  'ReporteDeEnviosPendientesImpresion'),
+            'imprimir_constancia':
+                (_url_staging % 'ImposicionRemota.svc',
+                 'ImprimirConstancia'),
         },
     }
 
@@ -349,7 +353,7 @@ class API(object):
         '''
         Permite consultar la trazabilidad de un envío.
 
-        args
+    args
         --------------
         NroPieza -- string: Número generado por Andreani que identifica un
                             envío, o el ID que el cliente asocia a cada uno de
@@ -368,13 +372,25 @@ class API(object):
         '''
         raise NotImplementedError()
 
-    def imprimir_constancias(self):
+    def imprimir_constancia(self, numero_andreani):
         '''
         Devuelve una URL que referencia al PDF correspondiente a
         la constancia de entrega de un envío determinado.
         Sólo aplica a envíos que están pendientes de impresión.
+
+        args
+        -------------------------------
+        numero_andreani -- string: Número de identificación de envíos Andreani.
         '''
-        raise NotImplementedError()
+        key_list = "ResultadoImprimirConstancia"
+        key_link = "PdfLinkFile"
+        # armo parametros de la peticion
+        parametros = {"ParamImprimirConstancia":
+                     {"NumeroAndreani": numero_andreani}}
+        # realizo peticion soap
+        response = self.__soap("imprimir_constancia", entities=parametros)
+        # devuelvo link del pdf para impresion de constancia del envio
+        return response[key_list][0][key_link] if response else None
 
     def anular_envio(self):
         '''
