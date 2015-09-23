@@ -53,8 +53,10 @@ class API(object):
                 (_url_staging % 'ImposicionRemota.svc',
                  'ReporteDeEnviosPendientesIngreso'),
             'anular_envio':
+                (_url_staging % 'ImposicionRemota.svc', 'AnularEnvios'),
+            'generar_remito_imposicion':
                 (_url_staging % 'ImposicionRemota.svc',
-                 'AnularEnvios'),
+                'GeneracionRemitodeImposicion'),
         },
     }
 
@@ -359,7 +361,7 @@ class API(object):
         '''
         Permite consultar la trazabilidad de un envío.
 
-    args
+        args
         --------------
         NroPieza -- string: Número generado por Andreani que identifica un
                             envío, o el ID que el cliente asocia a cada uno de
@@ -406,16 +408,19 @@ class API(object):
         -------------------------------
         numero_andreani -- string: Número de identificación de envíos Andreani.
         '''
-        key_list = "AnularEnviosResult"
+        key_list = "anular_envios_result"
         # armo parametros de la peticion
         parametros = {"ParamAnularEnvios":
                      {"NumeroAndreani": numero_andreani}}
         # realizo peticion soap
         response = self.__soap("anular_envio", envios=parametros)
-        # devuelvo link del pdf para impresion de constancia del envio
-        return response[key_list][0] if response[key_list] else None
+        if response:
+            _dict = self.__to_dict(response)
+            return _dict[key_list]
+        else:
+            return None
 
-    def consultar_datos_impresion(self):
+    def consultar_datos_impresion(self, numero_andreani):
         '''
         Este servicio permite consultar los datos de impresión de una pieza
         dada.
@@ -456,13 +461,25 @@ class API(object):
         else:
             return None
 
-    def generar_remito_imposicion(self):
+    def generar_remito_imposicion(self, numero_andreani):
         '''
         El remito de imposición es el comprobante tanto de la
         entrega de mercadería en sucursal por parte del vendedor
         como de el retiro en depósito realizado por Andreani.
+
+        args
+        -------------------------------
+        numero_andreani -- string: Número de identificación de envíos Andreani.
         '''
-        raise NotImplementedError()
+        key_list = "GeneracionRemitodeImposicionResult"
+        # armo parametros de la peticion
+        param = {"ParamGeneracionRemitodeImposicion": 
+                    {"NumeroAndreani": numero_andreani}}
+        # realizo peticion soap
+        response = self.__soap("generar_remito_imposicion", entidades=param)
+        print(response)
+        # devuelvo link del pdf para impresion de constancia del envio
+        return response[key_list][0] if response[key_list] else None
 
     def __to_dict(self, obj):
         '''
