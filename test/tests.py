@@ -729,3 +729,16 @@ class PendientesIngresoTests(TestCase):
         self.assertTrue(reporte)
         self.assertEqual(len(reporte), 3)
         self.assertEqual(reporte[1]["provincia"], "CORDOBA")
+
+    def test_lista_vacia(self):
+        '''
+        Pruebo con una lista vacia.
+        '''
+        # configuro lo que devolvera el mock
+        self.andreani._API__soap = mock.MagicMock(
+            return_value=Factory.object(
+                dict={"ResultadoReporteEnviosPendientesIngreso": []}))
+        # consulto envios pendientes de impresion
+        reporte = self.andreani.reporte_envios_pendientes_ingreso()
+        self.assertFalse(reporte)
+        self.assertEqual(len(reporte), 0)
