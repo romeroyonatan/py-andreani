@@ -742,3 +742,65 @@ class PendientesIngresoTests(TestCase):
         reporte = self.andreani.reporte_envios_pendientes_ingreso()
         self.assertFalse(reporte)
         self.assertEqual(len(reporte), 0)
+
+
+class AnularEnvioTests(TestCase):
+    '''
+    Set de pruebas de anular envios
+    '''
+    def setUp(self):
+        self.andreani = andreani.API(TEST_USER,
+                                     TEST_PASSWD,
+                                     CLIENTE,
+                                     CONTRATO_ESTANDAR)
+        self.andreani.DEBUG = True
+
+    def test_pendiente_ingreso(self):
+        '''
+        Pruebo que anule un envio pendiente de ingreso.
+        '''
+        # configuro respuesta del mock
+        self.andreani._API__soap = mock.MagicMock(
+            return_value=Factory.object(dict={
+                "AnularEnviosResult": [
+                    Factory.object(dict={
+                        "CodigoTransaccion": "1234",
+                        "Destinatario": "Susana Horia",
+                        "IdCliente": CLIENTE,
+                        "NumeroAndreani": "*00000010310370",
+                        "Productos": "Producto de prueba",
+                    })
+                ]}
+            )
+        )
+        response = self.andreani.anular_envio("*00000010310370")
+        self.assertTrue(response)
+
+    @mock.patch.object(suds.client.Client, '__new__')
+    def test_envio_inexistente(self, fake_client):
+        '''
+        Pruebo que obtenga los links PDF para imprimir en caso de numero de
+        envio inexistente.
+        '''
+        # creo un cliente suds falso
+        client = suds.client.Client('fake_url')
+        # el cliente falso retornará error
+        client.service.AnularEnvios.side_effect = suds.WebFault(
+            type("testclass", (object,), {
+                "Reason": type("testclass", (object,), {
+                               "Text": "Envio inexistente."}),
+            })(), None)
+        fake_client.return_value = client
+
+        with self.assertRaises(andreani.APIError):
+            self.andreani.anular_envio("*10000000249801")
+
+    def test_envio_anulado(self,):
+        '''
+        Pruebo que anule un envio ya anulado.
+        '''
+        # configuro respuesta del mock
+        self.andreani._API__soap = mock.MagicMock(
+            return_value=Factory.object(dict={"AnularEnviosResult": []}))
+        response = self.andreani.anular_envio("*00000010310370")
+        self.assertFalse(response)

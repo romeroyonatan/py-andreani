@@ -52,6 +52,9 @@ class API(object):
             'reporte_envios_pendientes_ingreso':
                 (_url_staging % 'ImposicionRemota.svc',
                  'ReporteDeEnviosPendientesIngreso'),
+            'anular_envio':
+                (_url_staging % 'ImposicionRemota.svc',
+                 'AnularEnvios'),
         },
     }
 
@@ -393,13 +396,24 @@ class API(object):
         # realizo peticion soap
         response = self.__soap("imprimir_constancia", entities=parametros)
         # devuelvo link del pdf para impresion de constancia del envio
-        return response[key_list][0][key_link] if response else None
+        return response[key_list][0][key_link] if response[key_list] else None
 
-    def anular_envio(self):
+    def anular_envio(self, numero_andreani):
         '''
-        Anula envíos que todavía no hayan ingresado al circuito operativo
+        Anula un envío que todavía no haya ingresado al circuito operativo
+
+        args
+        -------------------------------
+        numero_andreani -- string: Número de identificación de envíos Andreani.
         '''
-        raise NotImplementedError()
+        key_list = "AnularEnviosResult"
+        # armo parametros de la peticion
+        parametros = {"ParamAnularEnvios":
+                     {"NumeroAndreani": numero_andreani}}
+        # realizo peticion soap
+        response = self.__soap("anular_envio", envios=parametros)
+        # devuelvo link del pdf para impresion de constancia del envio
+        return response[key_list][0] if response[key_list] else None
 
     def consultar_datos_impresion(self):
         '''
