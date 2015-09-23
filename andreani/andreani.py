@@ -463,6 +463,8 @@ class API(object):
 
     def generar_remito_imposicion(self, numero_andreani):
         '''
+        Genera remito de imposicion para un envío en particular.
+
         El remito de imposición es el comprobante tanto de la
         entrega de mercadería en sucursal por parte del vendedor
         como de el retiro en depósito realizado por Andreani.
@@ -471,15 +473,18 @@ class API(object):
         -------------------------------
         numero_andreani -- string: Número de identificación de envíos Andreani.
         '''
-        key_list = "GeneracionRemitodeImposicionResult"
+        key = "generacion_remitode_imposicion_result"
         # armo parametros de la peticion
-        param = {"ParamGeneracionRemitodeImposicion": 
-                    {"NumeroAndreani": numero_andreani}}
+        param = {"ParamGeneracionRemitodeImposicion":
+                {"NumeroAndreani": numero_andreani}}
         # realizo peticion soap
         response = self.__soap("generar_remito_imposicion", entidades=param)
-        print(response)
         # devuelvo link del pdf para impresion de constancia del envio
-        return response[key_list][0] if response[key_list] else None
+        if response:
+            _dict = self.__to_dict(response)
+            return _dict[key][0]
+        else:
+            return None
 
     def __to_dict(self, obj):
         '''

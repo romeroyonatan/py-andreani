@@ -804,3 +804,55 @@ class AnularEnvioTests(TestCase):
             return_value=Factory.object(dict={"AnularEnviosResult": []}))
         response = self.andreani.anular_envio("*00000010310370")
         self.assertFalse(response)
+
+
+class GenerarRemitoImposicionTests(TestCase):
+    '''
+    Set de pruebas de generar remito de imposicion
+    '''
+    def setUp(self):
+        self.andreani = andreani.API(TEST_USER,
+                                     TEST_PASSWD,
+                                     CLIENTE,
+                                     CONTRATO_SUCURSAL)
+        self.andreani.DEBUG = True
+
+    def test_pendiente_impresion(self):
+        '''
+        Pruebo que obtenga los links PDF para imprimir en caso de envios
+        pendientes de impresion.
+        '''
+        # configuro respuesta del mock
+        self.andreani._API__soap = mock.MagicMock(
+            return_value=Factory.object(
+                dict={"GeneracionRemitodeImposicionResult": [
+                    Factory.object(dict={
+                        "Entidades": ["Andreani1234"],
+                        "Pdf": "http://fake_url.com/pdf",
+                        "RemitodeImposicion": "1234567890A",
+                    })
+                ]}
+            )
+        )
+        remito = self.andreani.generar_remito_imposicion("*00000010310370")
+        self.assertTrue(remito)
+        self.assertEqual(remito["pdf"], "http://fake_url.com/pdf")
+
+    @mock.patch.object(suds.client.Client, '__new__')
+    def test_envio_inexistente(self, fake_client):
+        '''
+        Pruebo que obtenga los links PDF para imprimir en caso de numero de
+        envio inexistente.
+        '''
+        # creo un cliente suds falso
+        client = suds.client.Client('fake_url')
+        # el cliente falso retornará error
+        client.service.GeneracionRemitodeImposicion.side_effect = (
+            suds.WebFault(type("testclass", (object,), {
+                "Reason": type("testclass", (object,), {
+                               "Text": """No se pudo generar la constancia,
+                               por favor reintente en unos minutos """}),
+            })(), None))
+        fake_client.return_value = client
+        with self.assertRaises(andreani.APIError):
+            self.andreani.generar_remito_imposicion("*10000000249801")
