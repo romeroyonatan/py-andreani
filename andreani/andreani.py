@@ -49,6 +49,9 @@ class API(object):
             'imprimir_constancia':
                 (_url_staging % 'ImposicionRemota.svc',
                  'ImprimirConstancia'),
+            'reporte_envios_pendientes_ingreso':
+                (_url_staging % 'ImposicionRemota.svc',
+                 'ReporteDeEnviosPendientesIngreso'),
         },
     }
 
@@ -415,12 +418,11 @@ class API(object):
         '''
         key = "resultado_reporte_envios_pendientes_impresion"
         # armo parametros de la peticion y devuelvo resultado
-        parametros = {"idCliente": self.cliente}
         response = self.__soap("reporte_envios_pendientes_impresion",
-                               ventas=parametros)
+                               ventas={"idCliente": self.cliente})
         if response:
             _dict = self.__to_dict(response)
-            return _dict[key] if _dict else None
+            return _dict[key]
         else:
             return None
 
@@ -429,7 +431,16 @@ class API(object):
         Devuelve un listado de envíos que ya se imprimieron pero
         que todavía no entraron en el circuito operativo de Andreani.
         '''
-        raise NotImplementedError()
+        key = "resultado_reporte_envios_pendientes_ingreso"
+        # armo parametros de la peticion y devuelvo resultado
+        response = self.__soap("reporte_envios_pendientes_ingreso",
+                               cliente={"Cliente": self.cliente})
+        # devuelvo lista de envios pendientes de ingreso
+        if response:
+            _dict = self.__to_dict(response)
+            return _dict[key]
+        else:
+            return None
 
     def generar_remito_imposicion(self):
         '''

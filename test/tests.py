@@ -580,7 +580,7 @@ class PendientesImpresionTests(TestCase):
         # configuro lo que devolvera el mock
         self.andreani._API__soap = mock.MagicMock(
             return_value=Factory.object(
-                dict={"ResultadoReporteEnviosPendientesImpresion[]": [
+                dict={"ResultadoReporteEnviosPendientesImpresion": [
                     Factory.object(dict=dict(
                         Calle="Florencio Varela",
                         Departamento=None,
@@ -668,3 +668,64 @@ class ImprimirConstanciaTests(TestCase):
         fake_client.return_value = client
         with self.assertRaises(andreani.APIError):
             self.andreani.imprimir_constancia("*10000000249801")
+
+
+class PendientesIngresoTests(TestCase):
+    '''
+    Set de pruebas de consulta de reportes de envios pendientes de ingreso al
+    circuito Andreani
+    '''
+    def setUp(self):
+        self.andreani = andreani.API(TEST_USER,
+                                     TEST_PASSWD,
+                                     CLIENTE,
+                                     CONTRATO_SUCURSAL)
+        self.andreani.DEBUG = True
+
+    def test_reporte(self):
+        '''
+        Pruebo que obtenga los envios pendientes de ingreso del cliente de
+        pruebas.
+        '''
+        # configuro lo que devolvera el mock
+        self.andreani._API__soap = mock.MagicMock(
+            return_value=Factory.object(
+                dict={"ResultadoReporteEnviosPendientesIngreso": [
+                    Factory.object(dict=dict(
+                        Calle="Florencio Varela",
+                        Departamento=None,
+                        DetalleProductosaEntregar="Prueba de entrega",
+                        Localidad="11 DE SEPTIEMBRE",
+                        NombreyApellido="Susana Horia",
+                        Numero="1903",
+                        NumeroAndreani="*00000010310340",
+                        Piso=None,
+                        Provincia="BUENOS AIRES",
+                    )),
+                    Factory.object(dict=dict(
+                        Calle="CAMINO JESUS MARIA",
+                        Departamento=None,
+                        DetalleProductosaEntregar=" ddd",
+                        Localidad="ACHIRAS",
+                        NombreyApellido="Bagley Argentina S.A.(Cordoba)",
+                        Numero="KM 5.5",
+                        NumeroAndreani="*00000000186207",
+                        Piso=None,
+                        Provincia="CORDOBA",
+                    )),
+                    Factory.object(dict=dict(
+                        Calle="Florencio Varela",
+                        Departamento=None,
+                        DetalleProductosaEntregar="Prueba de entrega",
+                        Localidad="11 DE SEPTIEMBRE",
+                        NombreyApellido="Susana Horia",
+                        Numero="1903",
+                        NumeroAndreani="*00000010310370",
+                        Piso=None,
+                        Provincia="BUENOS AIRES",
+                    ))]}))
+        # consulto envios pendientes de impresion
+        reporte = self.andreani.reporte_envios_pendientes_ingreso()
+        self.assertTrue(reporte)
+        self.assertEqual(len(reporte), 3)
+        self.assertEqual(reporte[1]["provincia"], "CORDOBA")
