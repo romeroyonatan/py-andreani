@@ -528,8 +528,14 @@ class API(object):
 
 
 class CodigoPostalInvalido(ValueError):
+    '''
+    Excepcion lanzada cuando el servidor devuelve codigo postal invalido.
+    '''
     pass
 
 
 class APIError(Exception):
+    '''
+    Excepcion lanzada cada vez que haya un error con el webservice de Andreani.
+    '''
     pass
