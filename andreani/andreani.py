@@ -57,6 +57,10 @@ class API(object):
             'generar_remito_imposicion':
                 (_url_staging % 'ImposicionRemota.svc',
                 'GeneracionRemitodeImposicion'),
+            'consulta_ultimo_estado_distribucion': (
+                ('https://www.e-andreani.com/eAndreaniWSStaging/' +
+                 'Service.svc?wsdl'),
+                'ObtenerEstadoDistribucion'),
         },
     }
 
@@ -363,9 +367,10 @@ class API(object):
 
         args
         --------------
-        NroPieza -- string: Número generado por Andreani que identifica un
-                            envío, o el ID que el cliente asocia a cada uno de
-                            los envíos provistos por él para su distribución.
+        numero_pieza -- string: Número generado por Andreani que identifica un
+                                envío, o el ID que el cliente asocia a cada uno
+                                de los envíos provistos por él para su
+                                distribución.
         '''
         # obtengo resultado
         response = self.__soap("consultar_trazabilidad", NroPieza={
@@ -373,12 +378,29 @@ class API(object):
         })
         return self.__to_dict(response) if response else None
 
-    def consulta_ultimo_estado_distribucion(self):
+    def consulta_ultimo_estado_distribucion(self,
+                                            numero_andreani,
+                                            numero_pieza=None):
         '''
         Devuelve el último estado de la Distribución de un envío, o
         una lista de envíos.
+
+        args
+        -------------------------------
+        numero_andreani -- string: Número de identificación de envíos Andreani.
+        numero_pieza -- string: Número generado por Andreani que identifica un
+                                envío, o el ID que el cliente asocia a cada uno
+                                de los envíos provistos por él para su
+                                distribución.
         '''
-        raise NotImplementedError()
+        # configuro parametros
+        pieza= {'NroPieza': numero_pieza, 'NroAndreani': numero_andreani}
+        consulta = {'CodigoCliente': self.cliente,
+                    'Piezas': [{'Pieza': pieza}]}
+        # obtengo resultado
+        response = self.__soap("consulta_ultimo_estado_distribucion",
+                               Consulta=consulta)
+        return self.__to_dict(response) if response else None
 
     def imprimir_constancia(self, numero_andreani):
         '''

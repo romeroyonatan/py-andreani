@@ -21,6 +21,9 @@ CONTRATO_ESTANDAR = "AND00EST"
 # Contrato gestion de cambio
 CONTRATO_CAMBIO = "AND00CMB"
 
+# Activa mocks para pruebas
+MOCK = True
+
 logging.basicConfig(filename='testing.log', filemode='w', level=logging.DEBUG)
 
 
@@ -856,3 +859,41 @@ class GenerarRemitoImposicionTests(TestCase):
         fake_client.return_value = client
         with self.assertRaises(andreani.APIError):
             self.andreani.generar_remito_imposicion("*10000000249801")
+
+
+class UltimoEstadoDistribucionTests(TestCase):
+    '''
+    Set de pruebas de generar remito de imposicion
+    '''
+    def setUp(self):
+        self.andreani = andreani.API(TEST_USER,
+                                     TEST_PASSWD,
+                                     CLIENTE,
+                                     CONTRATO_SUCURSAL)
+        self.andreani.DEBUG = True
+
+    def test_ingresado(self):
+        '''
+        Pruebo que obtenga el ultimo estado de distribucion para un envio
+        ingresado al circuito de distribucion andreani.
+        '''
+        # configuro respuesta del mock
+        self.andreani._API__soap = mock.MagicMock(
+            return_value=Factory.object(
+                dict={"Piezas": [
+                    Factory.object(dict={"Pieza":
+                        Factory.object(dict={
+                            "NroPieza": "123456780a",
+                            "NroAndreani": "*00000000249801",
+                            "Estado": "Entregada",
+                            "Fecha": "2012-01-01T00:00:00.00-00:00",
+                            "Motivo": None,
+                        })
+                    })
+                ]}
+            )
+        )
+        estado = self.andreani.consulta_ultimo_estado_distribucion(
+            "*00000000249801")
+        self.assertTrue(estado)
+        self.assertEqual(estado["piezas"][0]["pieza"]["estado"], "Entregada")
