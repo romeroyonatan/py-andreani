@@ -20,7 +20,9 @@ CONTRATO_ESTANDAR = "AND00EST"
 # Contrato gestion de cambio
 CONTRATO_CAMBIO = "AND00CMB"
 
-# Activa mocks para pruebas
+# Activa mocks para pruebas. Si los mocks están desactivados, las peticiones 
+# irán realmente a los servidores de Andreani. Caso contrario, se simularán
+# las respuestas del servidor
 MOCK = True
 
 logging.basicConfig(filename='testing.log', filemode='w', level=logging.DEBUG)
@@ -42,65 +44,66 @@ class ConsultarSucursalesTests(TestCase):
         '''
         Busca sucursales sin filtros
         '''
-        self.andreani._API__soap = mock.MagicMock(return_value=[[
-            Factory.object(dict={
-                "Descripcion": "9 DE JULIO",
-                "Direccion": "Bme. Mitre 1668, 6500, 9 DE JULIO, BUENOS AIRES",
-                "HoradeTrabajo": None,
-                "Latitud": None,
-                "Longitud": None,
-                "Mail": None,
-                "Numero": "NDJ",
-                "Responsable": None,
-                "Resumen": "9 DE JULIO",
-                "Sucursal": 71,
-                "Telefono1": "0810-122-1111",
-                "Telefono2": "0800-122-1112",
-                "Telefono3": None,
-                "TipoSucursal": 2,
-                "TipoTelefono1": None,
-                "TipoTelefono2": None,
-                "TipoTelefono3": None
-            }),
-            Factory.object(dict={
-                "Descripcion": "TRIBUNALES",
-                "Direccion": "MOLINEDO 1600, 1870 ,AVELLANEDA, BUENOS AIRES",
-                "HoradeTrabajo": "De Lunes a Viernes de 08:30 a 17:30",
-                "Latitud": None,
-                "Longitud": None,
-                "Mail": None,
-                "Numero": "TRI",
-                "Responsable": None,
-                "Resumen": "TRIBUNALES",
-                "Sucursal": 129,
-                "Telefono1": "0810-122-1111",
-                "Telefono2": "0800-122-1112",
-                "Telefono3": None,
-                "TipoSucursal": 3,
-                "TipoTelefono1": None,
-                "TipoTelefono2": None,
-                "TipoTelefono3": None
-            }),
-            Factory.object(dict={
-                "Descripcion": "AZUL",
-                "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
-                "HoradeTrabajo": None,
-                "Latitud": None,
-                "Longitud": None,
-                "Mail": None,
-                "Numero": "AZU",
-                "Responsable": None,
-                "Resumen": "AZUL",
-                "Sucursal": 34,
-                "Telefono1": "0810-122-1111",
-                "Telefono2": "0800-122-1112",
-                "Telefono3": None,
-                "TipoSucursal": 2,
-                "TipoTelefono1": None,
-                "TipoTelefono2": None,
-                "TipoTelefono3": None
-            }),
-        ]])
+        if MOCK:
+            self.andreani._API__soap = mock.MagicMock(return_value=[[
+                Factory.object(dict={
+                    "Descripcion": "9 DE JULIO",
+                    "Direccion": "Bme.Mitre 1668,6500,9 DE JULIO,BUENOS AIRES",
+                    "HoradeTrabajo": None,
+                    "Latitud": None,
+                    "Longitud": None,
+                    "Mail": None,
+                    "Numero": "NDJ",
+                    "Responsable": None,
+                    "Resumen": "9 DE JULIO",
+                    "Sucursal": 71,
+                    "Telefono1": "0810-122-1111",
+                    "Telefono2": "0800-122-1112",
+                    "Telefono3": None,
+                    "TipoSucursal": 2,
+                    "TipoTelefono1": None,
+                    "TipoTelefono2": None,
+                    "TipoTelefono3": None
+                }),
+                Factory.object(dict={
+                    "Descripcion": "TRIBUNALES",
+                    "Direccion": "MOLINEDO 1600,1870,AVELLANEDA,BUENOS AIRES",
+                    "HoradeTrabajo": "De Lunes a Viernes de 08:30 a 17:30",
+                    "Latitud": None,
+                    "Longitud": None,
+                    "Mail": None,
+                    "Numero": "TRI",
+                    "Responsable": None,
+                    "Resumen": "TRIBUNALES",
+                    "Sucursal": 129,
+                    "Telefono1": "0810-122-1111",
+                    "Telefono2": "0800-122-1112",
+                    "Telefono3": None,
+                    "TipoSucursal": 3,
+                    "TipoTelefono1": None,
+                    "TipoTelefono2": None,
+                    "TipoTelefono3": None
+                }),
+                Factory.object(dict={
+                    "Descripcion": "AZUL",
+                    "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
+                    "HoradeTrabajo": None,
+                    "Latitud": None,
+                    "Longitud": None,
+                    "Mail": None,
+                    "Numero": "AZU",
+                    "Responsable": None,
+                    "Resumen": "AZUL",
+                    "Sucursal": 34,
+                    "Telefono1": "0810-122-1111",
+                    "Telefono2": "0800-122-1112",
+                    "Telefono3": None,
+                    "TipoSucursal": 2,
+                    "TipoTelefono1": None,
+                    "TipoTelefono2": None,
+                    "TipoTelefono3": None
+                }),
+            ]])
         sucursales = self.andreani.consultar_sucursales()
         self.assertTrue(sucursales)
 
@@ -108,27 +111,28 @@ class ConsultarSucursalesTests(TestCase):
         '''
         Busca sucursales por codigo postal.
         '''
-        self.andreani._API__soap = mock.MagicMock(return_value=[[
-            Factory.object(dict={
-                "Descripcion": "AZUL",
-                "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
-                "HoradeTrabajo": None,
-                "Latitud": None,
-                "Longitud": None,
-                "Mail": None,
-                "Numero": "AZU",
-                "Responsable": None,
-                "Resumen": "AZUL",
-                "Sucursal": 34,
-                "Telefono1": "0810-122-1111",
-                "Telefono2": "0800-122-1112",
-                "Telefono3": None,
-                "TipoSucursal": 2,
-                "TipoTelefono1": None,
-                "TipoTelefono2": None,
-                "TipoTelefono3": None
-            }),
-        ]])
+        if MOCK:
+            self.andreani._API__soap = mock.MagicMock(return_value=[[
+                Factory.object(dict={
+                    "Descripcion": "AZUL",
+                    "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
+                    "HoradeTrabajo": None,
+                    "Latitud": None,
+                    "Longitud": None,
+                    "Mail": None,
+                    "Numero": "AZU",
+                    "Responsable": None,
+                    "Resumen": "AZUL",
+                    "Sucursal": 34,
+                    "Telefono1": "0810-122-1111",
+                    "Telefono2": "0800-122-1112",
+                    "Telefono3": None,
+                    "TipoSucursal": 2,
+                    "TipoTelefono1": None,
+                    "TipoTelefono2": None,
+                    "TipoTelefono3": None
+                }),
+            ]])
         sucursales = self.andreani.consultar_sucursales(codigo_postal=7300)
         self.assertTrue(sucursales)
 
@@ -136,65 +140,66 @@ class ConsultarSucursalesTests(TestCase):
         '''
         Busca sucursales por provincia.
         '''
-        self.andreani._API__soap = mock.MagicMock(return_value=[[
-            Factory.object(dict={
-                "Descripcion": "9 DE JULIO",
-                "Direccion": "Bme. Mitre 1668, 6500, 9 DE JULIO, BUENOS AIRES",
-                "HoradeTrabajo": None,
-                "Latitud": None,
-                "Longitud": None,
-                "Mail": None,
-                "Numero": "NDJ",
-                "Responsable": None,
-                "Resumen": "9 DE JULIO",
-                "Sucursal": 71,
-                "Telefono1": "0810-122-1111",
-                "Telefono2": "0800-122-1112",
-                "Telefono3": None,
-                "TipoSucursal": 2,
-                "TipoTelefono1": None,
-                "TipoTelefono2": None,
-                "TipoTelefono3": None
-            }),
-            Factory.object(dict={
-                "Descripcion": "TRIBUNALES",
-                "Direccion": "MOLINEDO 1600, 1870 ,AVELLANEDA, BUENOS AIRES",
-                "HoradeTrabajo": "De Lunes a Viernes de 08:30 a 17:30",
-                "Latitud": None,
-                "Longitud": None,
-                "Mail": None,
-                "Numero": "TRI",
-                "Responsable": None,
-                "Resumen": "TRIBUNALES",
-                "Sucursal": 129,
-                "Telefono1": "0810-122-1111",
-                "Telefono2": "0800-122-1112",
-                "Telefono3": None,
-                "TipoSucursal": 3,
-                "TipoTelefono1": None,
-                "TipoTelefono2": None,
-                "TipoTelefono3": None
-            }),
-            Factory.object(dict={
-                "Descripcion": "AZUL",
-                "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
-                "HoradeTrabajo": None,
-                "Latitud": None,
-                "Longitud": None,
-                "Mail": None,
-                "Numero": "AZU",
-                "Responsable": None,
-                "Resumen": "AZUL",
-                "Sucursal": 34,
-                "Telefono1": "0810-122-1111",
-                "Telefono2": "0800-122-1112",
-                "Telefono3": None,
-                "TipoSucursal": 2,
-                "TipoTelefono1": None,
-                "TipoTelefono2": None,
-                "TipoTelefono3": None
-            }),
-        ]])
+        if MOCK:
+            self.andreani._API__soap = mock.MagicMock(return_value=[[
+                Factory.object(dict={
+                    "Descripcion": "9 DE JULIO",
+                    "Direccion": "Bme.Mitre1668,6500,9 DE JULIO,BUENOS AIRES",
+                    "HoradeTrabajo": None,
+                    "Latitud": None,
+                    "Longitud": None,
+                    "Mail": None,
+                    "Numero": "NDJ",
+                    "Responsable": None,
+                    "Resumen": "9 DE JULIO",
+                    "Sucursal": 71,
+                    "Telefono1": "0810-122-1111",
+                    "Telefono2": "0800-122-1112",
+                    "Telefono3": None,
+                    "TipoSucursal": 2,
+                    "TipoTelefono1": None,
+                    "TipoTelefono2": None,
+                    "TipoTelefono3": None
+                }),
+                Factory.object(dict={
+                    "Descripcion": "TRIBUNALES",
+                    "Direccion": "MOLINEDO 1600,1870,AVELLANEDA,BUENOS AIRES",
+                    "HoradeTrabajo": "De Lunes a Viernes de 08:30 a 17:30",
+                    "Latitud": None,
+                    "Longitud": None,
+                    "Mail": None,
+                    "Numero": "TRI",
+                    "Responsable": None,
+                    "Resumen": "TRIBUNALES",
+                    "Sucursal": 129,
+                    "Telefono1": "0810-122-1111",
+                    "Telefono2": "0800-122-1112",
+                    "Telefono3": None,
+                    "TipoSucursal": 3,
+                    "TipoTelefono1": None,
+                    "TipoTelefono2": None,
+                    "TipoTelefono3": None
+                }),
+                Factory.object(dict={
+                    "Descripcion": "AZUL",
+                    "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
+                    "HoradeTrabajo": None,
+                    "Latitud": None,
+                    "Longitud": None,
+                    "Mail": None,
+                    "Numero": "AZU",
+                    "Responsable": None,
+                    "Resumen": "AZUL",
+                    "Sucursal": 34,
+                    "Telefono1": "0810-122-1111",
+                    "Telefono2": "0800-122-1112",
+                    "Telefono3": None,
+                    "TipoSucursal": 2,
+                    "TipoTelefono1": None,
+                    "TipoTelefono2": None,
+                    "TipoTelefono3": None
+                }),
+            ]])
         sucursales = self.andreani.consultar_sucursales(
             provincia="Buenos Aires")
         self.assertTrue(sucursales)
@@ -203,27 +208,28 @@ class ConsultarSucursalesTests(TestCase):
         '''
         Busca sucursales por localidad.
         '''
-        self.andreani._API__soap = mock.MagicMock(return_value=[[
-            Factory.object(dict={
-                "Descripcion": "AZUL",
-                "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
-                "HoradeTrabajo": None,
-                "Latitud": None,
-                "Longitud": None,
-                "Mail": None,
-                "Numero": "AZU",
-                "Responsable": None,
-                "Resumen": "AZUL",
-                "Sucursal": 34,
-                "Telefono1": "0810-122-1111",
-                "Telefono2": "0800-122-1112",
-                "Telefono3": None,
-                "TipoSucursal": 2,
-                "TipoTelefono1": None,
-                "TipoTelefono2": None,
-                "TipoTelefono3": None
-            }),
-        ]])
+        if MOCK:
+            self.andreani._API__soap = mock.MagicMock(return_value=[[
+                Factory.object(dict={
+                    "Descripcion": "AZUL",
+                    "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
+                    "HoradeTrabajo": None,
+                    "Latitud": None,
+                    "Longitud": None,
+                    "Mail": None,
+                    "Numero": "AZU",
+                    "Responsable": None,
+                    "Resumen": "AZUL",
+                    "Sucursal": 34,
+                    "Telefono1": "0810-122-1111",
+                    "Telefono2": "0800-122-1112",
+                    "Telefono3": None,
+                    "TipoSucursal": 2,
+                    "TipoTelefono1": None,
+                    "TipoTelefono2": None,
+                    "TipoTelefono3": None
+                }),
+            ]])
         sucursales = self.andreani.consultar_sucursales(localidad="azul")
         self.assertTrue(sucursales)
 
@@ -231,27 +237,28 @@ class ConsultarSucursalesTests(TestCase):
         '''
         Busca sucursales por varios filtros a la vez.
         '''
-        self.andreani._API__soap = mock.MagicMock(return_value=[[
-            Factory.object(dict={
-                "Descripcion": "AZUL",
-                "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
-                "HoradeTrabajo": None,
-                "Latitud": None,
-                "Longitud": None,
-                "Mail": None,
-                "Numero": "AZU",
-                "Responsable": None,
-                "Resumen": "AZUL",
-                "Sucursal": 34,
-                "Telefono1": "0810-122-1111",
-                "Telefono2": "0800-122-1112",
-                "Telefono3": None,
-                "TipoSucursal": 2,
-                "TipoTelefono1": None,
-                "TipoTelefono2": None,
-                "TipoTelefono3": None
-            }),
-        ]])
+        if MOCK:
+            self.andreani._API__soap = mock.MagicMock(return_value=[[
+                Factory.object(dict={
+                    "Descripcion": "AZUL",
+                    "Direccion": "Perón 441 , 7300 , AZUL , BUENOS AIRES",
+                    "HoradeTrabajo": None,
+                    "Latitud": None,
+                    "Longitud": None,
+                    "Mail": None,
+                    "Numero": "AZU",
+                    "Responsable": None,
+                    "Resumen": "AZUL",
+                    "Sucursal": 34,
+                    "Telefono1": "0810-122-1111",
+                    "Telefono2": "0800-122-1112",
+                    "Telefono3": None,
+                    "TipoSucursal": 2,
+                    "TipoTelefono1": None,
+                    "TipoTelefono2": None,
+                    "TipoTelefono3": None
+                }),
+            ]])
         sucursales = self.andreani.consultar_sucursales(
             codigo_postal=7300,
             localidad="azul")
@@ -265,27 +272,28 @@ class ConsultarSucursalesTests(TestCase):
         '''
         Busca sucursales por todos los filtros.
         '''
-        self.andreani._API__soap = mock.MagicMock(return_value=[[
-            Factory.object(dict={
-                "Descripcion": "TRIBUNALES",
-                "Direccion": "MOLINEDO 1600, 1870 ,AVELLANEDA, BUENOS AIRES",
-                "HoradeTrabajo": "De Lunes a Viernes de 08:30 a 17:30",
-                "Latitud": None,
-                "Longitud": None,
-                "Mail": None,
-                "Numero": "TRI",
-                "Responsable": None,
-                "Resumen": "TRIBUNALES",
-                "Sucursal": 129,
-                "Telefono1": "0810-122-1111",
-                "Telefono2": "0800-122-1112",
-                "Telefono3": None,
-                "TipoSucursal": 3,
-                "TipoTelefono1": None,
-                "TipoTelefono2": None,
-                "TipoTelefono3": None
-            }),
-        ]])
+        if MOCK:
+            self.andreani._API__soap = mock.MagicMock(return_value=[[
+                Factory.object(dict={
+                    "Descripcion": "TRIBUNALES",
+                    "Direccion": "MOLINEDO 1600,1870,AVELLANEDA,BUENOS AIRES",
+                    "HoradeTrabajo": "De Lunes a Viernes de 08:30 a 17:30",
+                    "Latitud": None,
+                    "Longitud": None,
+                    "Mail": None,
+                    "Numero": "TRI",
+                    "Responsable": None,
+                    "Resumen": "TRIBUNALES",
+                    "Sucursal": 129,
+                    "Telefono1": "0810-122-1111",
+                    "Telefono2": "0800-122-1112",
+                    "Telefono3": None,
+                    "TipoSucursal": 3,
+                    "TipoTelefono1": None,
+                    "TipoTelefono2": None,
+                    "TipoTelefono3": None
+                }),
+            ]])
         sucursales = self.andreani.consultar_sucursales(
             codigo_postal=1870,
             provincia="buenos aires",
@@ -297,8 +305,8 @@ class ConsultarSucursalesTests(TestCase):
         Busca sucursales por filtros disjuntos y espera como resultado una
         lista vacia.
         '''
-        # sin resultados
-        self.andreani._API__soap = mock.MagicMock(return_value=[[]])
+        if MOCK:
+            self.andreani._API__soap = mock.MagicMock(return_value=[[]])
         sucursales = self.andreani.consultar_sucursales(
             provincia="cordoba",
             localidad="san justo")
@@ -308,8 +316,8 @@ class ConsultarSucursalesTests(TestCase):
         '''
         Busca sucursales por un codigo postal inexistente
         '''
-        self.andreani._API__soap = mock.MagicMock(return_value=[[]])
-        # codigo postal invalido
+        if MOCK:
+            self.andreani._API__soap = mock.MagicMock(return_value=[[]])
         sucursales = self.andreani.consultar_sucursales(codigo_postal="1")
         self.assertFalse(sucursales)
 
@@ -331,16 +339,17 @@ class CotizarEnvioTests(TestCase):
         Cotizacion envio a domicilio.
         '''
         api = andreani.API(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_ESTANDAR)
-        api._API__soap = mock.MagicMock(
-            return_value=Factory.object(dict={
-                "CategoriaDistancia": "INTERIOR 1",
-                "CategoriaDistanciaId": "2",
-                "CategoriaPeso": "1",
-                "CategoriaPesoId": "1",
-                "PesoAforado": 1.0,
-                "Tarifa": 55.9,
-            }))
         api.DEBUG = True
+        if MOCK:
+            api._API__soap = mock.MagicMock(
+                return_value=Factory.object(dict={
+                    "CategoriaDistancia": "INTERIOR 1",
+                    "CategoriaDistanciaId": "2",
+                    "CategoriaPeso": "1",
+                    "CategoriaPesoId": "1",
+                    "PesoAforado": 1.0,
+                    "Tarifa": 55.9,
+                }))
         cotizacion = api.cotizar_envio(cp_destino="9410",  # ushuaia
                                        peso="1",
                                        volumen="1")
@@ -351,15 +360,16 @@ class CotizarEnvioTests(TestCase):
         '''
         Cotizacion envio a sucursal.
         '''
-        self.andreani._API__soap = mock.MagicMock(
-            return_value=Factory.object(dict={
-                "CategoriaDistancia": "INTERIOR 1",
-                "CategoriaDistanciaId": "2",
-                "CategoriaPeso": "1",
-                "CategoriaPesoId": "1",
-                "PesoAforado": 1.0,
-                "Tarifa": 55.9,
-            }))
+        if MOCK:
+            self.andreani._API__soap = mock.MagicMock(
+                return_value=Factory.object(dict={
+                    "CategoriaDistancia": "INTERIOR 1",
+                    "CategoriaDistanciaId": "2",
+                    "CategoriaPeso": "1",
+                    "CategoriaPesoId": "1",
+                    "PesoAforado": 1.0,
+                    "Tarifa": 55.9,
+                }))
         cotizacion = self.andreani.cotizar_envio(sucursal_retiro="20",
                                                  cp_destino="1754",
                                                  peso="1000",
