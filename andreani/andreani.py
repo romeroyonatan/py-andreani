@@ -9,8 +9,6 @@ import suds.client
 import suds.wsse
 from suds.bindings import binding
 from suds.sudsobject import asdict
-# modifico namespace del envoltorio soap
-binding.envns = ('SOAP-ENV', 'http://www.w3.org/2003/05/soap-envelope')
 
 
 class API(object):
@@ -21,46 +19,62 @@ class API(object):
 
     DEBUG = False
     _url_staging = "https://www.e-andreani.com/CasaStaging/eCommerce/%s?wsdl"
-    # ambiente, nombre, wsdl, metodo
+    # tuplas (wsdl, metodo, soap_version)
     _URL = {
-        'Staging': {
-            'consultar_sucursales': (_url_staging % 'ConsultaSucursales.svc',
-                                     'ConsultarSucursales'),
+        'Staging': { # ambiente
+            'consultar_sucursales': # nombre
+                (_url_staging % 'ConsultaSucursales.svc', # wsdl
+                'ConsultarSucursales', # metodo
+                1.2), #soap_version
             'cotizar_envio': (_url_staging % 'CotizacionEnvio.svc',
-                              'CotizarEnvio'),
+                              'CotizarEnvio',
+                              1.2),
             'confirmar_compra': (_url_staging % 'ImposicionRemota.svc',
-                                 'ConfirmarCompra'),
+                                 'ConfirmarCompra',
+                                 1.2),
             'confirmar_compra_datos_impresion':
                 (_url_staging % 'ImposicionRemota.svc',
-                 'ConfirmarCompraConRecibo'),
+                 'ConfirmarCompraConRecibo',
+                 1.2),
             'consultar_trazabilidad': (
                 ('https://www.e-andreani.com/eAndreaniWSStaging/' +
                  'Service.svc?wsdl'),
-                'ObtenerTrazabilidadSinClienteCodificado'
+                'ObtenerTrazabilidadSinClienteCodificado',
+                1.2
             ),
             'consultar_codigo_postal': (
                 ('https://bpmwmbsrv.andreani.com:41443/' +
                  'ConsultasCodigosPostales?wsdl'),
-                'ConsultarCodigoPostal'
-            ),
+                'ConsultarCodigoPostal',
+                1.1),
             'reporte_envios_pendientes_impresion':
                 (_url_staging % 'ImposicionRemota.svc',
-                 'ReporteDeEnviosPendientesImpresion'),
+                 'ReporteDeEnviosPendientesImpresion',
+                 1.2),
             'imprimir_constancia':
                 (_url_staging % 'ImposicionRemota.svc',
-                 'ImprimirConstancia'),
+                 'ImprimirConstancia',
+                 1.2),
             'reporte_envios_pendientes_ingreso':
                 (_url_staging % 'ImposicionRemota.svc',
-                 'ReporteDeEnviosPendientesIngreso'),
+                 'ReporteDeEnviosPendientesIngreso',
+                 1.2),
             'anular_envio':
-                (_url_staging % 'ImposicionRemota.svc', 'AnularEnvios'),
+                (_url_staging % 'ImposicionRemota.svc', 'AnularEnvios', 1.2),
             'generar_remito_imposicion':
                 (_url_staging % 'ImposicionRemota.svc',
-                'GeneracionRemitodeImposicion'),
+                'GeneracionRemitodeImposicion',
+                1.2),
             'consulta_ultimo_estado_distribucion': (
                 ('https://www.e-andreani.com/eAndreaniWSStaging/' +
                  'Service.svc?wsdl'),
-                'ObtenerEstadoDistribucion'),
+                'ObtenerEstadoDistribucion',
+                1.2),
+            'consultar_datos_impresion': (
+                ('https://bpmwmbsrvtest.andreani.com:7084/Ecommerce/' +
+                 'DatosImpresion?wsdl'),
+                'ConsultarDatosDeImpresion',
+                1.1),
         },
     }
 
@@ -82,15 +96,16 @@ class API(object):
         Realiza la peticion SOAP y devuelve el resultado
         '''
         try:
-            # obtengo url del wsdl y nombre de metodo a llamar
-            wsdl, metodo = self.__get_wsdl(peticion)
+            # obtengo url del wsdl, nombre de metodo y version de soap
+            wsdl, metodo, version = self.__get_wsdl(peticion)
             soap = suds.client.Client(wsdl)
-            # configuro content-type de la peticion
-            # XXX: es obligatorio para el servidor que el parametro "action"
-            # este dentro de la cabecera 'Content-Type'
             metodo = getattr(soap.service, metodo)
-            soap.set_options(wsse=self.security,
-                             headers={'Content-Type':
+            soap.set_options(wsse=self.security)
+            if version == 1.2:
+                # modifico namespace del envoltorio soap
+                binding.envns = ('SOAP-ENV', 'http://www.w3.org/2003/05/soap-envelope')
+                # configuro content-type de la peticion
+                soap.set_options(headers={'Content-Type':
                                       'application/soap+xml;charset=utf-8;' +
                                       'action=%s' %
                                       metodo.method.soap.action})
@@ -447,8 +462,20 @@ class API(object):
         Este servicio permite consultar los datos de impresión de una pieza
         dada.
         '''
-        raise NotImplementedError()
-
+        # modifico namespace del envoltorio soap
+        envns = binding.envns
+        binding.envns = ('SOAP-ENV', 
+                         'http://schemas.xmlsoap.org/soap/envelope/')
+        try:
+            # armo parametros de la peticion
+            parametros = {"NumeroAndreani":[{'string':numero_andreani}]}
+            # realizo peticion soap
+            response = self.__soap("consultar_datos_impresion",
+                               parametros=parametros)
+        finally:
+            # reestablezco namespace 
+            binding.envns = envns
+        return self.__to_dict(response)
     def reporte_envios_pendientes_impresion(self):
         '''
         Devuelve una lista de envíos que fueron dados a través del servicio

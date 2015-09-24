@@ -863,7 +863,7 @@ class GenerarRemitoImposicionTests(TestCase):
 
 class UltimoEstadoDistribucionTests(TestCase):
     '''
-    Set de pruebas de generar remito de imposicion
+    Set de pruebas de obtener ultimo estado de distribucion
     '''
     def setUp(self):
         self.andreani = andreani.API(TEST_USER,
@@ -897,3 +897,38 @@ class UltimoEstadoDistribucionTests(TestCase):
             "*00000000249801")
         self.assertTrue(estado)
         self.assertEqual(estado["piezas"][0]["pieza"]["estado"], "Entregada")
+
+
+class DatosImpresionTests(TestCase):
+    '''
+    Set de pruebas de consultar datos de impresion
+    '''
+    def setUp(self):
+        self.andreani = andreani.API(TEST_USER,
+                                     TEST_PASSWD,
+                                     CLIENTE,
+                                     CONTRATO_SUCURSAL)
+        self.andreani.DEBUG = True
+
+    def test_ingresado(self):
+        '''
+        Pruebo que obtenga el ultimo estado de distribucion para un envio
+        ingresado al circuito de distribucion andreani.
+        '''
+        # configuro respuesta del mock
+        self.andreani._API__soap = mock.MagicMock(
+            return_value=Factory.object(
+                dict={'ResultadoConsultarDatosDeImpresion': [
+                    dict(Categoria = "Estandar",
+                         CodigoDeResultado = 1,
+                         FechaDeRendicion = None,
+                         FechaDeVencimientoDePrimerVisita = None,
+                         FechasPactadas = None,
+                         IdCliente = "103",
+                         NumeroAndreani = "*00000000249801",
+                         NumeroDePermisionaria = "RNPSP Nº 586",
+                         SucursalDeDistribucion = "BAHIA BLANCA",
+                         SucursalDeRendicion = "0",
+                    )]}))
+        datos = self.andreani.consultar_datos_impresion("*00000000249801")
+        self.assertTrue(datos)
