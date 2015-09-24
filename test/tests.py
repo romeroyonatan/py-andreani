@@ -4,7 +4,6 @@ import andreani
 import suds
 import suds.client
 from suds.sudsobject import Factory
-import unittest
 from unittest import TestCase, mock
 
 # credenciales de prueba
@@ -558,8 +557,27 @@ class CodigoPostalTests(TestCase):
                                      CONTRATO_SUCURSAL)
         self.andreani.DEBUG = True
 
-    @unittest.expectedFailure
     def test_cp(self):
+        # configuro lo que devolvera el mock
+        self.andreani._API__soap = mock.MagicMock(
+            return_value=Factory.object(
+                dict={"ConsultarCodigoPostalOk": [
+                    Factory.object(dict={"Response": [
+                        Factory.object(dict={'Result': [dict(
+                            ResultCode=10,
+                            ResultDescription="Operación exitosa.-"
+                        )]}),
+                        Factory.object(dict={'CodigoPostal': [dict(
+                            CodigoPostal=1001,
+                            Nombre="CAPITAL FEDERAL",
+                            Observaciones=None,
+                            CodigoProvincia="C",
+                            NombreProvincia="Capital Federal",
+                        )]}),
+                    ]}),
+                ]}
+            ))
+        # realizo peticion
         cp = self.andreani.consultar_codigo_postal(1001)
         self.assertTrue(cp)
 
@@ -919,16 +937,16 @@ class DatosImpresionTests(TestCase):
         self.andreani._API__soap = mock.MagicMock(
             return_value=Factory.object(
                 dict={'ResultadoConsultarDatosDeImpresion': [
-                    dict(Categoria = "Estandar",
-                         CodigoDeResultado = 1,
-                         FechaDeRendicion = None,
-                         FechaDeVencimientoDePrimerVisita = None,
-                         FechasPactadas = None,
-                         IdCliente = "103",
-                         NumeroAndreani = "*00000000249801",
-                         NumeroDePermisionaria = "RNPSP Nº 586",
-                         SucursalDeDistribucion = "BAHIA BLANCA",
-                         SucursalDeRendicion = "0",
+                    dict(Categoria="Estandar",
+                         CodigoDeResultado=1,
+                         FechaDeRendicion=None,
+                         FechaDeVencimientoDePrimerVisita=None,
+                         FechasPactadas=None,
+                         IdCliente="103",
+                         NumeroAndreani="*00000000249801",
+                         NumeroDePermisionaria="RNPSP Nº 586",
+                         SucursalDeDistribucion="BAHIA BLANCA",
+                         SucursalDeRendicion="0",
                     )]}))
         datos = self.andreani.consultar_datos_impresion("*00000000249801")
         self.assertTrue(datos)

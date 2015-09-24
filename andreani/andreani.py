@@ -21,11 +21,11 @@ class API(object):
     _url_staging = "https://www.e-andreani.com/CasaStaging/eCommerce/%s?wsdl"
     # tuplas (wsdl, metodo, soap_version)
     _URL = {
-        'Staging': { # ambiente
-            'consultar_sucursales': # nombre
-                (_url_staging % 'ConsultaSucursales.svc', # wsdl
-                'ConsultarSucursales', # metodo
-                1.2), #soap_version
+        'Staging': {  # ambiente
+            'consultar_sucursales': (  # nombre
+                _url_staging % 'ConsultaSucursales.svc',  # wsdl
+                'ConsultarSucursales',  # metodo
+                1.2),  # soap_version
             'cotizar_envio': (_url_staging % 'CotizacionEnvio.svc',
                               'CotizarEnvio',
                               1.2),
@@ -101,15 +101,22 @@ class API(object):
             soap = suds.client.Client(wsdl)
             metodo = getattr(soap.service, metodo)
             soap.set_options(wsse=self.security)
+            # resguardo namespace del envelope por si lo modifico
+            envns = binding.envns
             if version == 1.2:
                 # modifico namespace del envoltorio soap
-                binding.envns = ('SOAP-ENV', 'http://www.w3.org/2003/05/soap-envelope')
+                binding.envns = ('SOAP-ENV',
+                                 'http://www.w3.org/2003/05/soap-envelope')
                 # configuro content-type de la peticion
                 soap.set_options(headers={'Content-Type':
                                       'application/soap+xml;charset=utf-8;' +
                                       'action=%s' %
                                       metodo.method.soap.action})
-            return metodo(**kwargs)
+            try:
+                return metodo(**kwargs)
+            finally:
+                # restauro namespace del envelope
+                binding.envns = envns
         except suds.WebFault as e:
             text = e.fault.Reason.Text
             if text == "Codigo postal es invalido":
@@ -370,11 +377,10 @@ class API(object):
         Permite consultar Códigos Postales, Localidades, Provincias y Países.
         '''
         # obtengo resultado
-        # response = self.__soap("consultar_codigo_postal",
-        #                        CodigoDePais=codigo_pais,
-        #                        CodigoPostal=codigo_postal)
-        # return self.__to_dict(response) if response else None
-        raise NotImplementedError()
+        response = self.__soap("consultar_codigo_postal",
+                               CodigoDePais=codigo_pais,
+                               CodigoPostal=codigo_postal)
+        return self.__to_dict(response) if response else None
 
     def consultar_trazabilidad(self, numero_pieza):
         '''
@@ -462,20 +468,13 @@ class API(object):
         Este servicio permite consultar los datos de impresión de una pieza
         dada.
         '''
-        # modifico namespace del envoltorio soap
-        envns = binding.envns
-        binding.envns = ('SOAP-ENV', 
-                         'http://schemas.xmlsoap.org/soap/envelope/')
-        try:
-            # armo parametros de la peticion
-            parametros = {"NumeroAndreani":[{'string':numero_andreani}]}
-            # realizo peticion soap
-            response = self.__soap("consultar_datos_impresion",
+        # armo parametros de la peticion
+        parametros = {"NumeroAndreani": [{'string': numero_andreani}]}
+        # realizo peticion soap
+        response = self.__soap("consultar_datos_impresion",
                                parametros=parametros)
-        finally:
-            # reestablezco namespace 
-            binding.envns = envns
         return self.__to_dict(response)
+
     def reporte_envios_pendientes_impresion(self):
         '''
         Devuelve una lista de envíos que fueron dados a través del servicio
