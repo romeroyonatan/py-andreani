@@ -1,5 +1,6 @@
 import logging
 
+import unittest
 import andreani
 import suds
 import suds.client
@@ -20,7 +21,7 @@ CONTRATO_ESTANDAR = "AND00EST"
 # Contrato gestion de cambio
 CONTRATO_CAMBIO = "AND00CMB"
 
-# Activa mocks para pruebas. Si los mocks están desactivados, las peticiones 
+# Activa mocks para pruebas. Si los mocks están desactivados, las peticiones
 # irán realmente a los servidores de Andreani. Caso contrario, se simularán
 # las respuestas del servidor
 MOCK = True
@@ -377,6 +378,7 @@ class CotizarEnvioTests(TestCase):
         self.assertTrue(cotizacion)
         self.assertTrue(cotizacion['tarifa'])
 
+    @unittest.skipIf(not MOCK, "Mock desactivados")
     @mock.patch.object(suds.client.Client, '__new__')
     def test_codigo_postal_invalido(self, fake_client):
         '''
@@ -397,6 +399,7 @@ class CotizarEnvioTests(TestCase):
                                         peso="1000",
                                         volumen="1000")
 
+    @unittest.skipIf(not MOCK, "Mock desactivados")
     @mock.patch.object(suds.client.Client, '__new__')
     def test_api_error(self, fake_client):
         '''
@@ -492,11 +495,12 @@ class ConfirmarCompraTests(TestCase):
         '''
         Prueba servicio de confirmar compra con cotizacion de envio
         '''
-        self.andreani._API__soap = mock.MagicMock(
-            return_value=Factory.object(dict={
-                "NumeroAndreani": "*00000000252903",
-                "Recibo": None
-            }))
+        if MOCK:
+            self.andreani._API__soap = mock.MagicMock(
+                return_value=Factory.object(dict={
+                    "NumeroAndreani": "*00000000252903",
+                    "Recibo": None
+                }))
         compra = self.andreani.confirmar_compra(**self.parametros)
         self.assertTrue(compra)
 
@@ -504,11 +508,12 @@ class ConfirmarCompraTests(TestCase):
         '''
         Prueba servicio de confirmar compra con cotizacion de envio.
         '''
-        self.andreani._API__soap = mock.MagicMock(
-            return_value=Factory.object(dict={
-                "NumeroAndreani": "*00000000252903",
-                "Recibo": "RETA01PSD00000001"
-            }))
+        if MOCK:
+            self.andreani._API__soap = mock.MagicMock(
+                return_value=Factory.object(dict={
+                    "NumeroAndreani": "*00000000252903",
+                    "Recibo": "RETA01PSD00000001"
+                }))
         self.parametros['numero_recibo'] = "1"
         compra = self.andreani.confirmar_compra_datos_impresion(
             **self.parametros)
@@ -530,29 +535,65 @@ class ConsultarTrazabilidadTests(TestCase):
         '''
         Consulta la trazabilidad de un paquete no enviado.
         '''
-        self.andreani._API__soap = mock.MagicMock(
-            return_value=Factory.object(dict={
-                "NumeroEnvio": "103",
-                "Envios": [
-                    Factory.object(dict={
-                        "NombreEnvio": "Constancia de Envío",
-                        "NroAndreani": "*00000000249801",
-                        "FechaAlta": "2015-07-22 10:10:50-03:00",
-                        "Eventos": [
-                            Factory.object(dict={
-                                "Fecha": "2015-07-22 10:10:50-03:00",
-                                "IdEstado": 30,
-                                "Estado": "Envío no ingresado",
-                                "IdMotivo": -1,
-                                "Motivo": None,
-                                "Sucursal": "Sucursal Genérica"})
-                        ],
-                    }),
-                ],
-            }))
+        if MOCK:
+            self.andreani._API__soap = mock.MagicMock(
+                return_value=Factory.object(dict={
+                    "NumeroEnvio": "103",
+                    "Envios": [
+                        Factory.object(dict={
+                            "NombreEnvio": "Constancia de Envío",
+                            "NroAndreani": "*00000000249801",
+                            "FechaAlta": "2015-07-22 10:10:50-03:00",
+                            "Eventos": [
+                                Factory.object(dict={
+                                    "Fecha": "2015-07-22 10:10:50-03:00",
+                                    "IdEstado": 30,
+                                    "Estado": "Envío no ingresado",
+                                    "IdMotivo": -1,
+                                    "Motivo": None,
+                                    "Sucursal": "Sucursal Genérica"})
+                            ],
+                        }),
+                    ],
+                }))
+            envio = "*00000000249801"
+        else:
+            # configuro parametros de la compra
+            parametros = {
+                'sucursal_retiro': '20',
+                'provincia': 'Buenos Aires',
+                'localidad': 'San Justo',
+                'codigo_postal': '1754',
+                'calle': 'Florencio Varela',
+                'numero': '1903',
+                'departamento': '',
+                'piso': '',
+                'nombre_apellido': 'Susana Horia',
+                'tipo_documento': 'DNI',
+                'numero_documento': '12345678',
+                'email': 'email@example.com',
+                'numero_celular': '011 15 1515 1111',
+                'numero_telefono': '011 4321 1234',
+                'nombre_apellido_alternativo': 'Susi',
+                'numero_transaccion': '',
+                'detalle_productos_entrega': 'Prueba de entrega',
+                'detalle_productos_retiro': 'Prueba de envio',
+                'peso': '1000',
+                'volumen': '1000',
+                'valor_declarado': '0.5',
+                'valor_cobrar': '1.0',
+                'contrato': '',
+                'sucursal_cliente': '',
+                'categoria_distancia': '',
+                'categoria_facturacion': '',
+                'categoria_peso': '',
+                'tarifa': '20.0',
+            }
+            response = self.andreani.confirmar_compra(**parametros)
+            envio = response["numero_andreani"]
 
         trazabilidad = self.andreani.consultar_trazabilidad(
-            numero_pieza="*00000000249801")
+            numero_pieza=envio)
         self.assertTrue(trazabilidad)
 
 
@@ -568,25 +609,26 @@ class CodigoPostalTests(TestCase):
         self.andreani.DEBUG = True
 
     def test_cp(self):
-        # configuro lo que devolvera el mock
-        self.andreani._API__soap = mock.MagicMock(
-            return_value=Factory.object(
-                dict={"ConsultarCodigoPostalOk": [
-                    Factory.object(dict={"Response": [
-                        Factory.object(dict={'Result': [dict(
-                            ResultCode=10,
-                            ResultDescription="Operación exitosa.-"
-                        )]}),
-                        Factory.object(dict={'CodigoPostal': [dict(
-                            CodigoPostal=1001,
-                            Nombre="CAPITAL FEDERAL",
-                            Observaciones=None,
-                            CodigoProvincia="C",
-                            NombreProvincia="Capital Federal",
-                        )]}),
-                    ]}),
-                ]}
-            ))
+        if MOCK:
+            # configuro lo que devolvera el mock
+            self.andreani._API__soap = mock.MagicMock(
+                return_value=Factory.object(
+                    dict={"ConsultarCodigoPostalOk": [
+                        Factory.object(dict={"Response": [
+                            Factory.object(dict={'Result': [dict(
+                                ResultCode=10,
+                                ResultDescription="Operación exitosa.-"
+                            )]}),
+                            Factory.object(dict={'CodigoPostal': [dict(
+                                CodigoPostal=1001,
+                                Nombre="CAPITAL FEDERAL",
+                                Observaciones=None,
+                                CodigoProvincia="C",
+                                NombreProvincia="Capital Federal",
+                            )]}),
+                        ]}),
+                    ]}
+                ))
         # realizo peticion
         cp = self.andreani.consultar_codigo_postal(1001)
         self.assertTrue(cp)
@@ -608,47 +650,48 @@ class PendientesImpresionTests(TestCase):
         Pruebo que obtenga los envios pendientes de impresion del cliente de
         pruebas.
         '''
-        # configuro lo que devolvera el mock
-        self.andreani._API__soap = mock.MagicMock(
-            return_value=Factory.object(
-                dict={"ResultadoReporteEnviosPendientesImpresion": [
-                    Factory.object(dict=dict(
-                        Calle="Florencio Varela",
-                        Departamento=None,
-                        DetalleProductosaEntregar="Prueba de entrega",
-                        Localidad="11 DE SEPTIEMBRE",
-                        NombreyApellido="Susana Horia",
-                        Numero="1903",
-                        NumeroAndreani="*00000010310340",
-                        Piso=None,
-                        Provincia="BUENOS AIRES",
-                    )),
-                    Factory.object(dict=dict(
-                        Calle="Florencio Varela",
-                        Departamento=None,
-                        DetalleProductosaEntregar="Prueba de entrega",
-                        Localidad="11 DE SEPTIEMBRE",
-                        NombreyApellido="Susana Horia",
-                        Numero="1903",
-                        NumeroAndreani="*00000010310350",
-                        Piso=None,
-                        Provincia="BUENOS AIRES",
-                    )),
-                    Factory.object(dict=dict(
-                        Calle="Florencio Varela",
-                        Departamento=None,
-                        DetalleProductosaEntregar="Prueba de entrega",
-                        Localidad="11 DE SEPTIEMBRE",
-                        NombreyApellido="Susana Horia",
-                        Numero="1903",
-                        NumeroAndreani="*00000010310370",
-                        Piso=None,
-                        Provincia="BUENOS AIRES",
-                    ))]}))
+        if MOCK:
+            # configuro lo que devolvera el mock
+            self.andreani._API__soap = mock.MagicMock(
+                return_value=Factory.object(
+                    dict={"ResultadoReporteEnviosPendientesImpresion": [
+                        Factory.object(dict=dict(
+                            Calle="Florencio Varela",
+                            Departamento=None,
+                            DetalleProductosaEntregar="Prueba de entrega",
+                            Localidad="11 DE SEPTIEMBRE",
+                            NombreyApellido="Susana Horia",
+                            Numero="1903",
+                            NumeroAndreani="*00000010310340",
+                            Piso=None,
+                            Provincia="BUENOS AIRES",
+                        )),
+                        Factory.object(dict=dict(
+                            Calle="Florencio Varela",
+                            Departamento=None,
+                            DetalleProductosaEntregar="Prueba de entrega",
+                            Localidad="11 DE SEPTIEMBRE",
+                            NombreyApellido="Susana Horia",
+                            Numero="1903",
+                            NumeroAndreani="*00000010310350",
+                            Piso=None,
+                            Provincia="BUENOS AIRES",
+                        )),
+                        Factory.object(dict=dict(
+                            Calle="Florencio Varela",
+                            Departamento=None,
+                            DetalleProductosaEntregar="Prueba de entrega",
+                            Localidad="11 DE SEPTIEMBRE",
+                            NombreyApellido="Susana Horia",
+                            Numero="1903",
+                            NumeroAndreani="*00000010310370",
+                            Piso=None,
+                            Provincia="BUENOS AIRES",
+                        ))]}))
         # consulto envios pendientes de impresion
         reporte = self.andreani.reporte_envios_pendientes_impresion()
         self.assertTrue(reporte)
-        self.assertEqual(reporte[0]["calle"], "Florencio Varela")
+        self.assertTrue(reporte[0]["calle"])
 
 
 class ImprimirConstanciaTests(TestCase):
@@ -667,20 +710,20 @@ class ImprimirConstanciaTests(TestCase):
         Pruebo que obtenga los links PDF para imprimir en caso de envios
         pendientes de impresion.
         '''
-        # configuro respuesta del mock
-        self.andreani._API__soap = mock.MagicMock(
-            return_value=Factory.object(
-                dict={"ResultadoImprimirConstancia": [
-                    Factory.object(dict={
-                        "PdfLinkFile": "http://fake_url.com/pdf",
-                    })
-                ]}
-            )
-        )
+        if MOCK:
+            # configuro respuesta del mock
+            self.andreani._API__soap = mock.MagicMock(
+                return_value=Factory.object(
+                    dict={"ResultadoImprimirConstancia": [
+                        Factory.object(dict={
+                            "PdfLinkFile": "http://fake_url.com/pdf",
+                        })
+                    ]}))
         pdf = self.andreani.imprimir_constancia("*00000010310370")
         self.assertTrue(pdf)
-        self.assertEqual(pdf, "http://fake_url.com/pdf")
+        self.assertIn("http", pdf)
 
+    @unittest.skipIf(not MOCK, "Mock desactivados")
     @mock.patch.object(suds.client.Client, '__new__')
     def test_envio_inexistente(self, fake_client):
         '''
@@ -718,57 +761,60 @@ class PendientesIngresoTests(TestCase):
         Pruebo que obtenga los envios pendientes de ingreso del cliente de
         pruebas.
         '''
-        # configuro lo que devolvera el mock
-        self.andreani._API__soap = mock.MagicMock(
-            return_value=Factory.object(
-                dict={"ResultadoReporteEnviosPendientesIngreso": [
-                    Factory.object(dict=dict(
-                        Calle="Florencio Varela",
-                        Departamento=None,
-                        DetalleProductosaEntregar="Prueba de entrega",
-                        Localidad="11 DE SEPTIEMBRE",
-                        NombreyApellido="Susana Horia",
-                        Numero="1903",
-                        NumeroAndreani="*00000010310340",
-                        Piso=None,
-                        Provincia="BUENOS AIRES",
-                    )),
-                    Factory.object(dict=dict(
-                        Calle="CAMINO JESUS MARIA",
-                        Departamento=None,
-                        DetalleProductosaEntregar=" ddd",
-                        Localidad="ACHIRAS",
-                        NombreyApellido="Bagley Argentina S.A.(Cordoba)",
-                        Numero="KM 5.5",
-                        NumeroAndreani="*00000000186207",
-                        Piso=None,
-                        Provincia="CORDOBA",
-                    )),
-                    Factory.object(dict=dict(
-                        Calle="Florencio Varela",
-                        Departamento=None,
-                        DetalleProductosaEntregar="Prueba de entrega",
-                        Localidad="11 DE SEPTIEMBRE",
-                        NombreyApellido="Susana Horia",
-                        Numero="1903",
-                        NumeroAndreani="*00000010310370",
-                        Piso=None,
-                        Provincia="BUENOS AIRES",
-                    ))]}))
+        if MOCK:
+            # configuro lo que devolvera el mock
+            self.andreani._API__soap = mock.MagicMock(
+                return_value=Factory.object(
+                    dict={"ResultadoReporteEnviosPendientesIngreso": [
+                        Factory.object(dict=dict(
+                            Calle="Florencio Varela",
+                            Departamento=None,
+                            DetalleProductosaEntregar="Prueba de entrega",
+                            Localidad="11 DE SEPTIEMBRE",
+                            NombreyApellido="Susana Horia",
+                            Numero="1903",
+                            NumeroAndreani="*00000010310340",
+                            Piso=None,
+                            Provincia="BUENOS AIRES",
+                        )),
+                        Factory.object(dict=dict(
+                            Calle="CAMINO JESUS MARIA",
+                            Departamento=None,
+                            DetalleProductosaEntregar=" ddd",
+                            Localidad="ACHIRAS",
+                            NombreyApellido="Bagley Argentina S.A.(Cordoba)",
+                            Numero="KM 5.5",
+                            NumeroAndreani="*00000000186207",
+                            Piso=None,
+                            Provincia="CORDOBA",
+                        )),
+                        Factory.object(dict=dict(
+                            Calle="Florencio Varela",
+                            Departamento=None,
+                            DetalleProductosaEntregar="Prueba de entrega",
+                            Localidad="11 DE SEPTIEMBRE",
+                            NombreyApellido="Susana Horia",
+                            Numero="1903",
+                            NumeroAndreani="*00000010310370",
+                            Piso=None,
+                            Provincia="BUENOS AIRES",
+                        ))]}))
         # consulto envios pendientes de impresion
         reporte = self.andreani.reporte_envios_pendientes_ingreso()
         self.assertTrue(reporte)
-        self.assertEqual(len(reporte), 3)
-        self.assertEqual(reporte[1]["provincia"], "CORDOBA")
+        self.assertGreater(len(reporte), 1)
+        self.assertTrue(reporte[1]["provincia"])
 
+    @unittest.skipIf(not MOCK, "Mock desactivados")
     def test_lista_vacia(self):
         '''
         Pruebo con una lista vacia.
         '''
-        # configuro lo que devolvera el mock
-        self.andreani._API__soap = mock.MagicMock(
-            return_value=Factory.object(
-                dict={"ResultadoReporteEnviosPendientesIngreso": []}))
+        if MOCK:
+            # configuro lo que devolvera el mock
+            self.andreani._API__soap = mock.MagicMock(
+                return_value=Factory.object(
+                    dict={"ResultadoReporteEnviosPendientesIngreso": []}))
         # consulto envios pendientes de impresion
         reporte = self.andreani.reporte_envios_pendientes_ingreso()
         self.assertFalse(reporte)
@@ -790,23 +836,58 @@ class AnularEnvioTests(TestCase):
         '''
         Pruebo que anule un envio pendiente de ingreso.
         '''
-        # configuro respuesta del mock
-        self.andreani._API__soap = mock.MagicMock(
-            return_value=Factory.object(dict={
-                "AnularEnviosResult": [
-                    Factory.object(dict={
-                        "CodigoTransaccion": "1234",
-                        "Destinatario": "Susana Horia",
-                        "IdCliente": CLIENTE,
-                        "NumeroAndreani": "*00000010310370",
-                        "Productos": "Producto de prueba",
-                    })
-                ]}
-            )
-        )
-        response = self.andreani.anular_envio("*00000010310370")
+        if MOCK:
+            # configuro respuesta del mock
+            self.andreani._API__soap = mock.MagicMock(
+                return_value=Factory.object(dict={
+                    "AnularEnviosResult": [
+                        Factory.object(dict={
+                            "CodigoTransaccion": "1234",
+                            "Destinatario": "Susana Horia",
+                            "IdCliente": CLIENTE,
+                            "NumeroAndreani": "*00000010310370",
+                            "Productos": "Producto de prueba",
+                        })]
+                }))
+            envio = "*00000010310370"
+        else:
+            # configuro parametros de la compra
+            parametros = {
+                'sucursal_retiro': '20',
+                'provincia': 'Buenos Aires',
+                'localidad': 'San Justo',
+                'codigo_postal': '1754',
+                'calle': 'Florencio Varela',
+                'numero': '1903',
+                'departamento': '',
+                'piso': '',
+                'nombre_apellido': 'Susana Horia',
+                'tipo_documento': 'DNI',
+                'numero_documento': '12345678',
+                'email': 'email@example.com',
+                'numero_celular': '011 15 1515 1111',
+                'numero_telefono': '011 4321 1234',
+                'nombre_apellido_alternativo': 'Susi',
+                'numero_transaccion': '',
+                'detalle_productos_entrega': 'Prueba de entrega',
+                'detalle_productos_retiro': 'Prueba de envio',
+                'peso': '1000',
+                'volumen': '1000',
+                'valor_declarado': '0.5',
+                'valor_cobrar': '1.0',
+                'contrato': '',
+                'sucursal_cliente': '',
+                'categoria_distancia': '',
+                'categoria_facturacion': '',
+                'categoria_peso': '',
+                'tarifa': '20.0',
+            }
+            response = self.andreani.confirmar_compra(**parametros)
+            envio = response["numero_andreani"]
+        response = self.andreani.anular_envio(envio)
         self.assertTrue(response)
 
+    @unittest.skipIf(not MOCK, "Mock desactivados")
     @mock.patch.object(suds.client.Client, '__new__')
     def test_envio_inexistente(self, fake_client):
         '''
@@ -831,8 +912,9 @@ class AnularEnvioTests(TestCase):
         Pruebo que anule un envio ya anulado.
         '''
         # configuro respuesta del mock
-        self.andreani._API__soap = mock.MagicMock(
-            return_value=Factory.object(dict={"AnularEnviosResult": []}))
+        if MOCK:
+            self.andreani._API__soap = mock.MagicMock(
+                return_value=Factory.object(dict={"AnularEnviosResult": []}))
         response = self.andreani.anular_envio("*00000010310370")
         self.assertFalse(response)
 
@@ -853,22 +935,60 @@ class GenerarRemitoImposicionTests(TestCase):
         Pruebo que obtenga los links PDF para imprimir en caso de envios
         pendientes de impresion.
         '''
-        # configuro respuesta del mock
-        self.andreani._API__soap = mock.MagicMock(
-            return_value=Factory.object(
-                dict={"GeneracionRemitodeImposicionResult": [
-                    Factory.object(dict={
-                        "Entidades": ["Andreani1234"],
-                        "Pdf": "http://fake_url.com/pdf",
-                        "RemitodeImposicion": "1234567890A",
-                    })
-                ]}
+        if MOCK:
+            # configuro respuesta del mock
+            self.andreani._API__soap = mock.MagicMock(
+                return_value=Factory.object(
+                    dict={"GeneracionRemitodeImposicionResult": [
+                        Factory.object(dict={
+                            "Entidades": ["Andreani1234"],
+                            "Pdf": "http://fake_url.com/pdf",
+                            "RemitodeImposicion": "1234567890A",
+                        })
+                    ]}
+                )
             )
-        )
-        remito = self.andreani.generar_remito_imposicion("*00000010310370")
-        self.assertTrue(remito)
-        self.assertEqual(remito["pdf"], "http://fake_url.com/pdf")
+            envio = "*00000010310370"
+        else:
+            # configuro parametros de la compra
+            parametros = {
+                'sucursal_retiro': '20',
+                'provincia': 'Buenos Aires',
+                'localidad': 'San Justo',
+                'codigo_postal': '1754',
+                'calle': 'Florencio Varela',
+                'numero': '1903',
+                'departamento': '',
+                'piso': '',
+                'nombre_apellido': 'Susana Horia',
+                'tipo_documento': 'DNI',
+                'numero_documento': '12345678',
+                'email': 'email@example.com',
+                'numero_celular': '011 15 1515 1111',
+                'numero_telefono': '011 4321 1234',
+                'nombre_apellido_alternativo': 'Susi',
+                'numero_transaccion': '',
+                'detalle_productos_entrega': 'Prueba de entrega',
+                'detalle_productos_retiro': 'Prueba de envio',
+                'peso': '1000',
+                'volumen': '1000',
+                'valor_declarado': '0.5',
+                'valor_cobrar': '1.0',
+                'contrato': '',
+                'sucursal_cliente': '',
+                'categoria_distancia': '',
+                'categoria_facturacion': '',
+                'categoria_peso': '',
+                'tarifa': '20.0',
+            }
+            response = self.andreani.confirmar_compra(**parametros)
+            envio = response["numero_andreani"]
 
+        remito = self.andreani.generar_remito_imposicion(envio)
+        self.assertTrue(remito)
+        self.assertTrue(remito["pdf"])
+
+    @unittest.skipIf(not MOCK, "Mock desactivados")
     @mock.patch.object(suds.client.Client, '__new__')
     def test_envio_inexistente(self, fake_client):
         '''
@@ -905,26 +1025,26 @@ class UltimoEstadoDistribucionTests(TestCase):
         Pruebo que obtenga el ultimo estado de distribucion para un envio
         ingresado al circuito de distribucion andreani.
         '''
-        # configuro respuesta del mock
-        self.andreani._API__soap = mock.MagicMock(
-            return_value=Factory.object(
-                dict={"Piezas": [
-                    Factory.object(dict={"Pieza":
-                        Factory.object(dict={
-                            "NroPieza": "123456780a",
-                            "NroAndreani": "*00000000249801",
-                            "Estado": "Entregada",
-                            "Fecha": "2012-01-01T00:00:00.00-00:00",
-                            "Motivo": None,
+        if MOCK:
+            # configuro respuesta del mock
+            self.andreani._API__soap = mock.MagicMock(
+                return_value=Factory.object(
+                    dict={"Piezas": [
+                        Factory.object(dict={"Pieza":
+                            Factory.object(dict={
+                                "NroPieza": "123456780a",
+                                "NroAndreani": "*00000000249801",
+                                "Estado": "Entregada",
+                                "Fecha": "2012-01-01T00:00:00.00-00:00",
+                                "Motivo": None,
+                            })
                         })
-                    })
-                ]}
+                    ]}
+                )
             )
-        )
         estado = self.andreani.consulta_ultimo_estado_distribucion(
             "*00000000249801")
         self.assertTrue(estado)
-        self.assertEqual(estado["piezas"][0]["pieza"]["estado"], "Entregada")
 
 
 class DatosImpresionTests(TestCase):
@@ -943,20 +1063,21 @@ class DatosImpresionTests(TestCase):
         Pruebo que obtenga el ultimo estado de distribucion para un envio
         ingresado al circuito de distribucion andreani.
         '''
-        # configuro respuesta del mock
-        self.andreani._API__soap = mock.MagicMock(
-            return_value=Factory.object(
-                dict={'ResultadoConsultarDatosDeImpresion': [
-                    dict(Categoria="Estandar",
-                         CodigoDeResultado=1,
-                         FechaDeRendicion=None,
-                         FechaDeVencimientoDePrimerVisita=None,
-                         FechasPactadas=None,
-                         IdCliente="103",
-                         NumeroAndreani="*00000000249801",
-                         NumeroDePermisionaria="RNPSP Nº 586",
-                         SucursalDeDistribucion="BAHIA BLANCA",
-                         SucursalDeRendicion="0",
-                    )]}))
+        if MOCK:
+            # configuro respuesta del mock
+            self.andreani._API__soap = mock.MagicMock(
+                return_value=Factory.object(
+                    dict={'ResultadoConsultarDatosDeImpresion': [
+                        dict(Categoria="Estandar",
+                             CodigoDeResultado=1,
+                             FechaDeRendicion=None,
+                             FechaDeVencimientoDePrimerVisita=None,
+                             FechasPactadas=None,
+                             IdCliente="103",
+                             NumeroAndreani="*00000000249801",
+                             NumeroDePermisionaria="RNPSP Nº 586",
+                             SucursalDeDistribucion="BAHIA BLANCA",
+                             SucursalDeRendicion="0",
+                        )]}))
         datos = self.andreani.consultar_datos_impresion("*00000000249801")
         self.assertTrue(datos)
