@@ -521,6 +521,7 @@ class API(object):
         -------------------------------
         numero_andreani -- string: Número de identificación de envíos Andreani.
         '''
+        key = "resultado_generacion_remitode_imposicion"
         # armo parametros de la peticion
         param = {"ParamGeneracionRemitodeImposicion":
                 {"NumeroAndreani": numero_andreani}}
@@ -529,7 +530,7 @@ class API(object):
         # devuelvo link del pdf para impresion de constancia del envio
         if response:
             _dict = self.__to_dict(response)
-            return _dict
+            return _dict[key][0]
         else:
             return None
 

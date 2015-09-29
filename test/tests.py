@@ -939,7 +939,7 @@ class GenerarRemitoImposicionTests(TestCase):
             # configuro respuesta del mock
             self.andreani._API__soap = mock.MagicMock(
                 return_value=Factory.object(
-                    dict={"GeneracionRemitodeImposicionResult": [
+                    dict={"ResultadoGeneracionRemitodeImposicion": [
                         Factory.object(dict={
                             "Entidades": ["Andreani1234"],
                             "Pdf": "http://fake_url.com/pdf",
@@ -1082,6 +1082,7 @@ class DatosImpresionTests(TestCase):
         datos = self.andreani.consultar_datos_impresion("*00000000249801")
         self.assertTrue(datos)
 
+
 class IntegrationTests(TestCase):
     '''
     Pruebas de integración de una compra.
@@ -1134,6 +1135,7 @@ class IntegrationTests(TestCase):
         )
         self.assertTrue(compra)
 
+    @unittest.skipIf(MOCK, "Prueba debe realizarse sin mocks")
     def test_impresion(self):
         '''
         Prueba circuito de impresion de etiquetas y remitos de imposicion.
