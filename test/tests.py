@@ -840,7 +840,7 @@ class AnularEnvioTests(TestCase):
             # configuro respuesta del mock
             self.andreani._API__soap = mock.MagicMock(
                 return_value=Factory.object(dict={
-                    "AnularEnviosResult": [
+                    "ResultadoAnularEnvios": [
                         Factory.object(dict={
                             "CodigoTransaccion": "1234",
                             "Destinatario": "Susana Horia",
@@ -914,7 +914,7 @@ class AnularEnvioTests(TestCase):
         # configuro respuesta del mock
         if MOCK:
             self.andreani._API__soap = mock.MagicMock(
-                return_value=Factory.object(dict={"AnularEnviosResult": []}))
+                return_value=Factory.object(dict={"ResultadoAnularEnvios": []}))
         response = self.andreani.anular_envio("*00000010310370")
         self.assertFalse(response)
 
@@ -1085,7 +1085,7 @@ class DatosImpresionTests(TestCase):
 
 class IntegrationTests(TestCase):
     '''
-    Pruebas de integración de una compra.
+    Pruebas de integración del módulo.
     '''
 
     def setUp(self):
@@ -1157,8 +1157,21 @@ class IntegrationTests(TestCase):
             pieza["numero_andreani"])
         self.assertTrue(remito)
 
+    @unittest.skipIf(MOCK, "Prueba debe realizarse sin mocks")
     def test_anular(self):
         '''
         Prueba circuito de anulacion de envios.
         '''
-        pass
+        # vendedor consulta envios pendientes de ingreso al circuito operativo
+        # andreani, es decir, que el paquete no se despachó en la sucursal
+        # Andreani
+        ventas = self.andreani.reporte_envios_pendientes_ingreso()
+        self.assertTrue(ventas)
+        # vendedor selecciona pieza para anular
+        pieza = ventas[0]
+        self.assertTrue(pieza)
+        print(pieza)
+        # vendedor anula envio
+        respuesta = self.andreani.anular_envio(pieza["numero_andreani"])
+        self.assertTrue(respuesta)
+        print(respuesta)

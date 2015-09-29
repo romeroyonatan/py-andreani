@@ -451,7 +451,7 @@ class API(object):
         -------------------------------
         numero_andreani -- string: Número de identificación de envíos Andreani.
         '''
-        key_list = "anular_envios_result"
+        key = "resultado_anular_envios"
         # armo parametros de la peticion
         parametros = {"ParamAnularEnvios":
                      {"NumeroAndreani": numero_andreani}}
@@ -459,7 +459,7 @@ class API(object):
         response = self.__soap("anular_envio", envios=parametros)
         if response:
             _dict = self.__to_dict(response)
-            return _dict[key_list]
+            return _dict[key]
         else:
             return None
 
