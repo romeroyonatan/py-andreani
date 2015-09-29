@@ -1081,3 +1081,82 @@ class DatosImpresionTests(TestCase):
                         )]}))
         datos = self.andreani.consultar_datos_impresion("*00000000249801")
         self.assertTrue(datos)
+
+class IntegrationTests(TestCase):
+    '''
+    Pruebas de integración de una compra.
+    '''
+
+    def setUp(self):
+        self.andreani = andreani.API(TEST_USER,
+                                     TEST_PASSWD,
+                                     CLIENTE,
+                                     CONTRATO_SUCURSAL)
+        self.andreani.DEBUG = True
+
+    @unittest.skipIf(MOCK, "Prueba debe realizarse sin mocks")
+    def test_compra(self):
+        '''
+        Prueba circuito de compra de un cliente.
+        '''
+        # comprador consulta sucursales disponibles para retirar
+        sucursales = self.andreani.consultar_sucursales()
+        self.assertTrue(sucursales)
+        # comprador elije sucursal
+        sucursal = sucursales[0]["sucursal"]
+        self.assertTrue(sucursal)
+        # comprador solicita cotizacion del envio
+        cotizacion = self.andreani.cotizar_envio(sucursal_retiro=sucursal,
+                                                 cp_destino="1754",
+                                                 peso="1000",
+                                                 volumen="1000")
+        self.assertTrue(cotizacion)
+        # comprador acepta tarifa y comfirma la compra llenando sus datos
+        # personales
+        compra = self.andreani.confirmar_compra(
+            sucursal_retiro=sucursal,
+            provincia="Buenos Aires",
+            localidad="San Justo",
+            codigo_postal=1754,
+            calle="Florencio Varela",
+            numero="1903",
+            nombre_apellido="Elsa Pato",
+            tipo_documento="DNI",
+            numero_documento="12345678",
+            email="email@example.com",
+            numero_celular="1515151111",
+            numero_telefono="43211234",
+            detalle_productos_entrega="Prueba de entrega",
+            detalle_productos_retiro="Prueba de envio",
+            peso=1000,
+            volumen=1000,
+            tarifa=cotizacion["tarifa"]
+        )
+        self.assertTrue(compra)
+
+    def test_impresion(self):
+        '''
+        Prueba circuito de impresion de etiquetas y remitos de imposicion.
+        '''
+        # vendedor consulta ventas para imprimir etiquetas
+        ventas = self.andreani.reporte_envios_pendientes_impresion()
+        self.assertTrue(ventas)
+        # vendedor selecciona una venta e imprime etiqueta para el paquete
+        venta = ventas[0]
+        pdf = self.andreani.imprimir_constancia(venta["numero_andreani"])
+        self.assertTrue(pdf)
+        # vendedor consulta ventas para enviar a andreani
+        ventas = self.andreani.reporte_envios_pendientes_ingreso()
+        self.assertTrue(ventas)
+        # vendedor selecciona piezas e imprime remito de imposicion
+        pieza = ventas[0]
+        self.assertTrue(pieza)
+        remito = self.andreani.generar_remito_imposicion(
+            pieza["numero_andreani"])
+        self.assertTrue(remito)
+
+    def test_anular(self):
+        '''
+        Prueba circuito de anulacion de envios.
+        '''
+        pass
