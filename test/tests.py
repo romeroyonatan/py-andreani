@@ -37,8 +37,7 @@ class ConsultarSucursalesTests(TestCase):
     def setUp(self):
         self.andreani = andreani.API(TEST_USER,
                                      TEST_PASSWD,
-                                     CLIENTE,
-                                     CONTRATO_SUCURSAL)
+                                     CLIENTE)
         self.andreani.DEBUG = True
 
     def test_sin_filtros(self):
@@ -331,15 +330,14 @@ class CotizarEnvioTests(TestCase):
     def setUp(self):
         self.andreani = andreani.API(TEST_USER,
                                      TEST_PASSWD,
-                                     CLIENTE,
-                                     CONTRATO_SUCURSAL)
+                                     CLIENTE)
         self.andreani.DEBUG = True
 
     def test_cotizar_envio_domicilio(self):
         '''
         Cotizacion envio a domicilio.
         '''
-        api = andreani.API(TEST_USER, TEST_PASSWD, CLIENTE, CONTRATO_ESTANDAR)
+        api = andreani.API(TEST_USER, TEST_PASSWD, CLIENTE)
         api.DEBUG = True
         if MOCK:
             api._API__soap = mock.MagicMock(
@@ -353,6 +351,7 @@ class CotizarEnvioTests(TestCase):
                 }))
         cotizacion = api.cotizar_envio(cp_destino="9410",  # ushuaia
                                        peso="1",
+                                       contrato=CONTRATO_ESTANDAR,
                                        volumen="1")
         self.assertTrue(cotizacion)
         self.assertTrue(cotizacion['tarifa'])
@@ -374,6 +373,7 @@ class CotizarEnvioTests(TestCase):
         cotizacion = self.andreani.cotizar_envio(sucursal_retiro="20",
                                                  cp_destino="1754",
                                                  peso="1000",
+                                                 contrato=CONTRATO_ESTANDAR,
                                                  volumen="1000")
         self.assertTrue(cotizacion)
         self.assertTrue(cotizacion['tarifa'])
@@ -397,6 +397,7 @@ class CotizarEnvioTests(TestCase):
         with self.assertRaises(andreani.CodigoPostalInvalido):
             self.andreani.cotizar_envio(cp_destino="1",
                                         peso="1000",
+                                        contrato=CONTRATO_ESTANDAR,
                                         volumen="1000")
 
     @unittest.skipIf(not MOCK, "Mock desactivados")
@@ -418,7 +419,8 @@ class CotizarEnvioTests(TestCase):
         with self.assertRaises(andreani.APIError):
             self.andreani.cotizar_envio(cp_destino="1",
                                         peso="1000",
-                                        volumen="1000")
+                                        volumen="1000",
+                                        contrato=CONTRATO_ESTANDAR)
 
     def test_volumen_menor_cero(self):
         '''
@@ -455,8 +457,7 @@ class ConfirmarCompraTests(TestCase):
     def setUp(self):
         self.andreani = andreani.API(TEST_USER,
                                      TEST_PASSWD,
-                                     CLIENTE,
-                                     CONTRATO_SUCURSAL)
+                                     CLIENTE)
         self.andreani.DEBUG = True
 
         # configuro parametros de la compra
@@ -483,7 +484,7 @@ class ConfirmarCompraTests(TestCase):
             'volumen': '1000',
             'valor_declarado': '0.5',
             'valor_cobrar': '1.0',
-            'contrato': '',
+            'contrato': CONTRATO_ESTANDAR,
             'sucursal_cliente': '',
             'categoria_distancia': '',
             'categoria_facturacion': '',
@@ -527,8 +528,7 @@ class ConsultarTrazabilidadTests(TestCase):
     def setUp(self):
         self.andreani = andreani.API(TEST_USER,
                                      TEST_PASSWD,
-                                     CLIENTE,
-                                     CONTRATO_SUCURSAL)
+                                     CLIENTE)
         self.andreani.DEBUG = True
 
     def test_consultar_trazabilidad(self):
@@ -582,7 +582,7 @@ class ConsultarTrazabilidadTests(TestCase):
                 'volumen': '1000',
                 'valor_declarado': '0.5',
                 'valor_cobrar': '1.0',
-                'contrato': '',
+                'contrato': CONTRATO_ESTANDAR,
                 'sucursal_cliente': '',
                 'categoria_distancia': '',
                 'categoria_facturacion': '',
@@ -604,8 +604,7 @@ class CodigoPostalTests(TestCase):
     def setUp(self):
         self.andreani = andreani.API(TEST_USER,
                                      TEST_PASSWD,
-                                     CLIENTE,
-                                     CONTRATO_SUCURSAL)
+                                     CLIENTE)
         self.andreani.DEBUG = True
 
     def test_cp(self):
@@ -641,8 +640,7 @@ class PendientesImpresionTests(TestCase):
     def setUp(self):
         self.andreani = andreani.API(TEST_USER,
                                      TEST_PASSWD,
-                                     CLIENTE,
-                                     CONTRATO_SUCURSAL)
+                                     CLIENTE)
         self.andreani.DEBUG = True
 
     def test_reporte(self):
@@ -701,8 +699,7 @@ class ImprimirConstanciaTests(TestCase):
     def setUp(self):
         self.andreani = andreani.API(TEST_USER,
                                      TEST_PASSWD,
-                                     CLIENTE,
-                                     CONTRATO_SUCURSAL)
+                                     CLIENTE)
         self.andreani.DEBUG = True
 
     def test_pendiente_impresion(self):
@@ -752,8 +749,7 @@ class PendientesIngresoTests(TestCase):
     def setUp(self):
         self.andreani = andreani.API(TEST_USER,
                                      TEST_PASSWD,
-                                     CLIENTE,
-                                     CONTRATO_SUCURSAL)
+                                     CLIENTE)
         self.andreani.DEBUG = True
 
     def test_reporte(self):
@@ -828,8 +824,7 @@ class AnularEnvioTests(TestCase):
     def setUp(self):
         self.andreani = andreani.API(TEST_USER,
                                      TEST_PASSWD,
-                                     CLIENTE,
-                                     CONTRATO_ESTANDAR)
+                                     CLIENTE)
         self.andreani.DEBUG = True
 
     def test_pendiente_ingreso(self):
@@ -875,7 +870,7 @@ class AnularEnvioTests(TestCase):
                 'volumen': '1000',
                 'valor_declarado': '0.5',
                 'valor_cobrar': '1.0',
-                'contrato': '',
+                'contrato': CONTRATO_ESTANDAR,
                 'sucursal_cliente': '',
                 'categoria_distancia': '',
                 'categoria_facturacion': '',
@@ -926,8 +921,7 @@ class GenerarRemitoImposicionTests(TestCase):
     def setUp(self):
         self.andreani = andreani.API(TEST_USER,
                                      TEST_PASSWD,
-                                     CLIENTE,
-                                     CONTRATO_SUCURSAL)
+                                     CLIENTE)
         self.andreani.DEBUG = True
 
     def test_pendiente_impresion(self):
@@ -974,7 +968,7 @@ class GenerarRemitoImposicionTests(TestCase):
                 'volumen': '1000',
                 'valor_declarado': '0.5',
                 'valor_cobrar': '1.0',
-                'contrato': '',
+                'contrato': CONTRATO_ESTANDAR,
                 'sucursal_cliente': '',
                 'categoria_distancia': '',
                 'categoria_facturacion': '',
@@ -1016,8 +1010,7 @@ class UltimoEstadoDistribucionTests(TestCase):
     def setUp(self):
         self.andreani = andreani.API(TEST_USER,
                                      TEST_PASSWD,
-                                     CLIENTE,
-                                     CONTRATO_SUCURSAL)
+                                     CLIENTE)
         self.andreani.DEBUG = True
 
     def test_ingresado(self):
@@ -1054,8 +1047,7 @@ class DatosImpresionTests(TestCase):
     def setUp(self):
         self.andreani = andreani.API(TEST_USER,
                                      TEST_PASSWD,
-                                     CLIENTE,
-                                     CONTRATO_SUCURSAL)
+                                     CLIENTE)
         self.andreani.DEBUG = True
 
     def test_ingresado(self):

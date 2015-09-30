@@ -78,7 +78,7 @@ class API(object):
         },
     }
 
-    def __init__(self, username, password, cliente, contrato):
+    def __init__(self, username, password, cliente):
         '''
         Inicializa datos del objeto
         '''
@@ -88,8 +88,6 @@ class API(object):
         self.security.tokens.append(token)
         # numero de cliente
         self.cliente = cliente
-        # numero de servicio andreani
-        self.contrato = contrato
 
     def __soap(self, peticion, **kwargs):
         '''
@@ -147,7 +145,12 @@ class API(object):
 
     @validator.gt("peso", 0)
     @validator.gt("volumen", 0)
-    def cotizar_envio(self, peso, volumen, cp_destino, sucursal_retiro=None):
+    def cotizar_envio(self,
+                      peso,
+                      volumen,
+                      cp_destino,
+                      contrato,
+                      sucursal_retiro=None):
         '''
         Permite cotizar en línea el costo de un envío.
 
@@ -165,7 +168,7 @@ class API(object):
         parametros = {
             'CPDestino': cp_destino,
             'Cliente': self.cliente,
-            'Contrato': self.contrato,
+            'Contrato': contrato,
             'Peso': peso,
             'SucursalRetiro': sucursal_retiro,
             'Volumen': volumen,
@@ -204,7 +207,6 @@ class API(object):
         email -- String
         numero_celular -- String
         numero_telefono -- String
-        email -- String
         nombre_apellido_alternativo -- String
         numero_transaccion -- String: ID de identificación de envío del Cliente
         detalle_productos_entrega -- String
@@ -260,7 +262,7 @@ class API(object):
             'Volumen': kwargs.get('volumen'),
             'ValorDeclarado': kwargs.get('valor_declarado'),
             'ValorACobrar': kwargs.get('valor_cobrar'),
-            'Contrato': self.contrato,
+            'Contrato': kwargs.get('contrato'),
             'SucursalCliente': kwargs.get('sucursal_cliente'),
             'CategoriaDistancia': kwargs.get('categoria_distancia'),
             'CategoriaFacturacion': kwargs.get('categoria_facturacion'),
@@ -359,7 +361,7 @@ class API(object):
             'Volumen': kwargs.get('volumen'),
             'ValorDeclarado': kwargs.get('valor_declarado'),
             'ValorACobrar': kwargs.get('valor_cobrar'),
-            'Contrato': self.contrato,
+            'Contrato': kwargs.get('contrato'),
             'SucursalCliente': kwargs.get('sucursal_cliente'),
             'CategoriaDistancia': kwargs.get('categoria_distancia'),
             'CategoriaFacturacion': kwargs.get('categoria_facturacion'),
