@@ -19,6 +19,47 @@ python setup.py install
 ```
 
 ## Uso
+### Inicio
+Instanciación de la API
+
+* **Username**: Nombre de usuario Andreani.
+* **Password**: Contraseña Andreani.
+* **Cliente**: Código de cliente otorgado por comercial de Andreani.
+
+```python
+import andreani
+api = andreani.API(username="eCommerce_Integra",
+                   password="passw0rd",
+                   cliente="ANDCORREO")
+api.DEBUG = True
+```
+
+### Consultar sucursales
+Devuelve una lista de sucursales Andreani habilitadas para la entrega por
+mostrador. Se puede filtrar por *código postal*, *localidad* o *provincia*
+
+```python
+sucursales = api.consultar_sucursales()
+sucursales = api.consultar_sucursales(codigo_postal=1001)
+sucursales = api.consultar_sucursales(localidad="San Luis")
+sucursales = api.consultar_sucursales(provincia="Cordoba")
+```
+
+### Cotizar envíos
+Permite cotizar en línea el costo de un envío.
+* **Peso**: Peso del paquete en gramos.
+* **Volumen**: Volumen del paquete en cm3.
+* **Contrato**: Contrato Andreani elegido (Entrega estándar, entrega urgente o
+retiro en sucursal Andreani).
+* **CPDestino**: Código postal del comprador.
+
+```python
+cotizacion = api.cotizar_envio(cp_destino="9410",
+                               peso="1",
+                               contrato="AND00EST",
+                               volumen="1")
+```
+
 
 ## Documentación oficial
 Para ver la documentación oficial de Andreani, por favor descargue el documento desde [aquí](http://www.andreani.com/FilesRelated/Download?FileId=27)
