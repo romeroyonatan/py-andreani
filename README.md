@@ -29,6 +29,7 @@ python setup.py install
 ...                    password="passw0rd",
 ...                    cliente="ANDCORREO")
 >>> api.DEBUG = True
+
 >>> # comprador consulta sucursales disponibles para retirar
 >>> api.consultar_sucursales(localidad="San Justo")
 [{'tipo_telefono': None,
@@ -59,6 +60,7 @@ python setup.py install
   'horade_trabajo': None,
   'latitud': None
 }]
+
 >>> # comprador cotiza el envio del paquete
 >>> api.cotizar_envio(sucursal_retiro=20,
 ...                   cp_destino="1754",
@@ -72,6 +74,7 @@ python setup.py install
  'categoria_peso_id': 2,
  'categoria_distancia_id': 1
 }
+
 >>> # comprador confirma la compra e ingresa datos de envio
 >>> api.confirmar_compra(
 ...     sucursal_retiro=20,
@@ -105,6 +108,7 @@ python setup.py install
 ...                    password="passw0rd",
 ...                    cliente="ANDCORREO")
 >>> api.DEBUG = True
+
 >>> # vendedor consulta ventas para imprimir etiquetas (en modo debug puede tardar mucho)
 >>> api.reporte_envios_pendientes_impresion()
 [{
@@ -128,6 +132,7 @@ python setup.py install
   'calle': calle 1,
   'numero': 1111
 }]
+
 >>> # vendedor selecciona una venta y obtiene pdf de la etiqueta para imprimir
 >>> api.imprimir_constancia("*00000010311000")
 https://www.e-andreani.com/CasaStaging/ecommerce/impresionetiquetas/ImpresionEti
@@ -138,6 +143,7 @@ cyEYsNG1zRQtCdEUFJlqDoaLjz3PlhVW6iz3zvgkLh%2fh9ZFchdQngMDo2c4i6tXrkafzYf4CEF3rT0
 NPOSoMF%2b%2fcZnOpeTNEvMz9r41M0UcAd6o%2b0AbzlbXbj5ulGBu0zzKfRa0qie679SmfftL14ghD
 92QEkRuAQgz4RRLY26hQv5Dke8u3SSdS8t%2b%2bLGPu2uLXFERRsLpZvtsVsF95dXYE0SU2sPGC78Un
 0HeV7Y6vh%2bKQ3t2E%3d
+
 >>> # vendedor consulta ventas para enviar a andreani
 >>> api.reporte_envios_pendientes_ingreso()
 [{
@@ -151,6 +157,7 @@ NPOSoMF%2b%2fcZnOpeTNEvMz9r41M0UcAd6o%2b0AbzlbXbj5ulGBu0zzKfRa0qie679SmfftL14ghD
  'calle': Corrientes,
  'numero': 777
 }]
+
 >>> # vendedor selecciona piezas e imprime remito de imposicion
 >>> api.generar_remito_imposicion("*00000000255574")
 {
@@ -270,6 +277,8 @@ Distancia
 Obligatorio cuando la tarifas del servicio
 se cotizan por Categorías de Peso. (por ej.
 1.- Zapatos, 2.-Indumentaria)
+* **Contrato**: Contrato Andreani elegido (Entrega estándar, entrega urgente o
+retiro en sucursal Andreani).
 * **tarifa**: Valor de cotización del envío. Sólo se setea
 si se consume el servicio web de Cotización.
 Este valor es de referencia, ya que el sistema
