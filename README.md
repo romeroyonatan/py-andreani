@@ -159,7 +159,7 @@ NPOSoMF%2b%2fcZnOpeTNEvMz9r41M0UcAd6o%2b0AbzlbXbj5ulGBu0zzKfRa0qie679SmfftL14ghD
 }]
 
 >>> # vendedor selecciona piezas e imprime remito de imposicion
->>> api.generar_remito_imposicion("*00000000255574")
+>>> api.generar_remito_imposicion("*00000010248630")
 {
  'entidades': {
     'string': [*00000010248630]
