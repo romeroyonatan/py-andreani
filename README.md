@@ -184,6 +184,13 @@ import andreani
 api = andreani.API(username="eCommerce_Integra",
                    password="passw0rd",
                    cliente="ANDCORREO")
+```
+
+#### Modo DEBUG
+Al activarlo, las peticiones se realizarán a los servidores de *Staging*
+de Andreani. Caso contrario se harán hacia los servidores productivos
+
+```python
 api.DEBUG = True
 ```
 
