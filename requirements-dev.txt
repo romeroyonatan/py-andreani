@@ -1,3 +1,0 @@
-pyflakes
-pep8
-coverage

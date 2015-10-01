@@ -4,7 +4,11 @@
 #   pyflakes
 #   PEP8
 #   coverage
-
+echo "## Instalando dependencias:"
+pip install pyflakes
+pip install pep8
+pip install coverage
+echo "##"
 
 #pyflakes
 echo "## Pyflakes:"

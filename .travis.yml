@@ -6,7 +6,7 @@ python:
 install:
   - pip install coveralls
   - pip install coverage
-  - pip install -r requirements.txt
+  - pip install suds-jurko
 script:
   coverage run --source=andreani setup.py test
 after_success:
