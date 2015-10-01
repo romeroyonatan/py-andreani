@@ -58,6 +58,7 @@ python setup.py install
   'horade_trabajo': None,
   'latitud': None
 }]
+>>> # comprador cotiza el envio del paquete
 >>> api.cotizar_envio(sucursal_retiro=20,
 ...                   cp_destino="1754",
 ...                   peso="1000",
