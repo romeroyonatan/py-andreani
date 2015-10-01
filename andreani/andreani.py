@@ -161,6 +161,7 @@ class API(object):
                                     para los Servicios de Retiro en Sucursal
         cp_destino -- string: Obligatorio para los Servicios de Envío a
                               Domicilio
+        contrato -- String: Contrato Andreani elegido
         peso -- float: Expresado en gramos
         volumen -- float: Expresados en centimetros cúbicos
         '''
@@ -232,6 +233,7 @@ class API(object):
                                    Obligatorio cuando la tarifas del servicio
                                    se cotizan por Categorías de Peso. (por ej.
                                    1.- Zapatos, 2.-Indumentaria)
+        contrato -- String: Contrato Andreani elegido
         tarifa -- Decimal: Valor de cotización del envío. Sólo se setea
                            si se consume el servicio web de Cotización.
                            Este valor es de referencia, ya que el sistema
