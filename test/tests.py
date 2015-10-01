@@ -1102,6 +1102,7 @@ class IntegrationTests(TestCase):
         cotizacion = self.andreani.cotizar_envio(sucursal_retiro=sucursal,
                                                  cp_destino="1754",
                                                  peso="1000",
+            					 contrato="AND00EST",
                                                  volumen="1000")
         self.assertTrue(cotizacion)
         # comprador acepta tarifa y comfirma la compra llenando sus datos
@@ -1123,6 +1124,7 @@ class IntegrationTests(TestCase):
             detalle_productos_retiro="Prueba de envio",
             peso=1000,
             volumen=1000,
+            contrato="AND00EST",
             tarifa=cotizacion["tarifa"]
         )
         self.assertTrue(compra)
