@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='py-andreani',
-      version='0.2beta',
+      version='0.2b1',
       description='Implementa servicios ofrecidos por API de Andreani',
       author='Yonatan Romero',
       author_email='yromero@openmailbox.org',
