@@ -264,6 +264,8 @@ valor_declarado -- Float: Obligatorio para los Servicios que incluye
 seguro en caso de siniestro
 * **valor_cobrar**: Obligatorio para los Servicio que incluyen
 Gestión Cobranza (pago contrareembolso)
+* **valor_declarado**: Obligatorio para los Servicios que incluye
+seguro en caso de siniestro
 * **sucursal_cliente**: Nombre que identifica la sucursal/depósito
 del Cliente. Obligatorio para los Servicios
 de Retiro en Sucursal Andreani más próxima
